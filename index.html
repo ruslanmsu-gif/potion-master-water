@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potion Master: Wizard Sort</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Шапка Академии Магии -->
+        <header>
+            <div class="header-info">
+                <span class="chapter-badge" id="chapter-label">Семестр 1: Основы зельеварения</span>
+                <h1 class="level-title" id="level-title">Урок 1</h1>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="sound-btn" title="Звук">🔊</button>
+            </div>
+        </header>
+
+        <!-- Игровая сцена (Canvas) -->
+        <div id="canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <!-- Нижняя панель заклинаний (Undo, Restart, +Flask) -->
+        <footer>
+            <button class="tool-btn" id="undo-btn" title="Отмена хода">
+                <div class="tool-icon-circle">↺</div>
+                <span>Отмена</span>
+            </button>
+            <button class="tool-btn" id="restart-btn" title="Начать заново">
+                <div class="tool-icon-circle">⟳</div>
+                <span>Сброс</span>
+            </button>
+            <button class="tool-btn" id="add-flask-btn" title="Добавить пустую колбу">
+                <div class="tool-icon-circle">🧪+</div>
+                <span>+ Колба</span>
+            </button>
+        </footer>
+
+        <!-- Модальное окно завершения урока (Победа) -->
+        <div class="modal-overlay" id="victory-modal">
+            <div class="parchment-card">
+                <div class="victory-stars">★ ★ ★</div>
+                <h2 class="modal-title">Зелье Сварено!</h2>
+                <p class="modal-desc" id="victory-desc">Идеальная чистота эссенции. Профессор зельеварения доволен вашей работой.</p>
+                <button class="primary-btn" id="next-level-btn">Следующий урок ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты игры -->
+    <script src="audio.js"></script>
+    <script src="levels.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
