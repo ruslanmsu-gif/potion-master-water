@@ -1,4 +1,4 @@
-﻿// Potion Master: Wizard Sort — Игровой движок с улучшенной физикой переливания и горизонтом жидкости
+// Potion Master: Wizard Sort — Движок с физикой живой воды, пружинными волнами и органической струей
 
 class PotionGame {
     constructor() {
@@ -13,10 +13,15 @@ class PotionGame {
         this.isAnimating = false;
         this.hasAddedExtraFlask = false;
 
+        // Пружинные волны для каждой колбы
+        this.wavePoints = [];
+        this.waveCount = 14;
+
         // Частицы
         this.bubbles = [];
         this.sparkles = [];
         this.splashParticles = [];
+        this.foamRipples = [];
         
         // Текущее состояние переливания
         this.pourAnimation = null;
@@ -85,20 +90,32 @@ class PotionGame {
         this.addFlaskBtn.disabled = false;
         this.undoBtn.disabled = true;
 
+        this.initWaves();
         this.initBubbles();
         this.calculateLayout();
         this.victoryModal.classList.remove('active');
     }
 
+    initWaves() {
+        this.wavePoints = [];
+        for (let i = 0; i < this.flasks.length; i++) {
+            const pts = [];
+            for (let j = 0; j < this.waveCount; j++) {
+                pts.push({ y: 0, vy: 0 });
+            }
+            this.wavePoints.push(pts);
+        }
+    }
+
     initBubbles() {
         this.bubbles = [];
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 50; i++) {
             this.bubbles.push({
-                xOffsetRatio: (Math.random() - 0.5) * 0.7,
+                xOffsetRatio: (Math.random() - 0.5) * 0.72,
                 yProgress: Math.random(),
-                radius: 1.5 + Math.random() * 2.2,
-                speed: 0.002 + Math.random() * 0.004,
-                wobbleSpeed: 2 + Math.random() * 3,
+                radius: 1.4 + Math.random() * 2.4,
+                speed: 0.002 + Math.random() * 0.005,
+                wobbleSpeed: 2 + Math.random() * 3.5,
                 wobblePhase: Math.random() * Math.PI * 2
             });
         }
@@ -128,7 +145,7 @@ class PotionGame {
 
         const maxInRow = Math.max(row1Count, row2Count);
         const availableWidth = this.width * 0.88;
-        const flaskW = Math.min(62, availableWidth / (maxInRow + 0.4));
+        const flaskW = Math.min(64, availableWidth / (maxInRow + 0.4));
         const flaskH = flaskW * 2.85;
 
         const startY1 = row2Count > 0 ? this.height * 0.35 : this.height * 0.52;
@@ -187,14 +204,25 @@ class PotionGame {
         if (this.selectedFlaskIndex === null) {
             if (this.flasks[clickedIdx].length > 0) {
                 this.selectedFlaskIndex = clickedIdx;
+                this.disturbWaves(clickedIdx, 8);
                 window.soundEngine.playSelect();
             }
         } else if (this.selectedFlaskIndex === clickedIdx) {
             this.selectedFlaskIndex = null;
+            this.disturbWaves(clickedIdx, 4);
             window.soundEngine.playClick();
         } else {
             this.tryPour(this.selectedFlaskIndex, clickedIdx);
         }
+    }
+
+    disturbWaves(flaskIdx, power) {
+        if (!this.wavePoints[flaskIdx]) return;
+        const pts = this.wavePoints[flaskIdx];
+        const mid = Math.floor(pts.length / 2);
+        pts[mid].vy -= power;
+        if (mid > 0) pts[mid - 1].vy -= power * 0.7;
+        if (mid < pts.length - 1) pts[mid + 1].vy -= power * 0.7;
     }
 
     tryPour(fromIdx, toIdx) {
@@ -234,6 +262,7 @@ class PotionGame {
 
         if (toFlask.length > 0) {
             this.selectedFlaskIndex = toIdx;
+            this.disturbWaves(toIdx, 6);
             window.soundEngine.playSelect();
         } else {
             this.selectedFlaskIndex = null;
@@ -247,20 +276,16 @@ class PotionGame {
         const toBox = this.layout[toIdx];
 
         const isTargetToRight = toBox.x >= fromBox.x;
-        // Угол наклона: 75 градусов (1.31 радиан)
-        const targetAngle = isTargetToRight ? 1.35 : -1.35;
+        const targetAngle = isTargetToRight ? 1.38 : -1.38;
 
-        // Рассчитываем позицию, чтобы горлышко верхней колбы зависало прямо над горлышком целевой колбы
-        const neckOffsetLocalX = isTargetToRight ? (fromBox.w * 0.2) : -(fromBox.w * 0.2);
+        const neckOffsetLocalX = isTargetToRight ? (fromBox.w * 0.22) : -(fromBox.w * 0.22);
         const neckOffsetLocalY = -fromBox.h * 0.5;
 
-        // Поворот точки горлышка
         const rotatedLipX = neckOffsetLocalX * Math.cos(targetAngle) - neckOffsetLocalY * Math.sin(targetAngle);
         const rotatedLipY = neckOffsetLocalX * Math.sin(targetAngle) + neckOffsetLocalY * Math.cos(targetAngle);
 
-        // Горлышко целевой колбы
-        const targetLipX = toBox.x + (isTargetToRight ? -fromBox.w * 0.22 : fromBox.w * 0.22);
-        const targetLipY = toBox.y - toBox.h * 0.5 - 12;
+        const targetLipX = toBox.x + (isTargetToRight ? -fromBox.w * 0.25 : fromBox.w * 0.25);
+        const targetLipY = toBox.y - toBox.h * 0.5 - 14;
 
         const pourX = targetLipX - rotatedLipX;
         const pourY = targetLipY - rotatedLipY;
@@ -276,9 +301,9 @@ class PotionGame {
             pourY,
             targetAngle,
             progress: 0,
-            phase: 'move', // move -> pouring -> return
+            phase: 'move',
             streamActive: false,
-            pourFraction: 0 // 0..1 плавный объем перелива
+            pourFraction: 0
         };
 
         window.soundEngine.startPour();
@@ -313,6 +338,7 @@ class PotionGame {
         this.hasAddedExtraFlask = true;
         this.addFlaskBtn.disabled = true;
         this.calculateLayout();
+        this.initWaves();
         window.soundEngine.playFlaskComplete();
     }
 
@@ -332,16 +358,16 @@ class PotionGame {
         this.isAnimating = true;
         window.soundEngine.playLevelWin();
 
-        for (let i = 0; i < 75; i++) {
+        for (let i = 0; i < 80; i++) {
             this.sparkles.push({
                 x: this.width * (0.2 + Math.random() * 0.6),
                 y: this.height * (0.3 + Math.random() * 0.4),
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6 - 2,
-                radius: 2 + Math.random() * 3,
+                vx: (Math.random() - 0.5) * 7,
+                vy: (Math.random() - 0.5) * 7 - 2.5,
+                radius: 2 + Math.random() * 3.5,
                 color: Math.random() > 0.5 ? '#ffd166' : '#9d4edd',
                 alpha: 1,
-                decay: 0.015 + Math.random() * 0.02
+                decay: 0.014 + Math.random() * 0.02
             });
         }
 
@@ -368,12 +394,44 @@ class PotionGame {
     }
 
     update(dt) {
+        // 1. Симуляция пружинных волн
+        const k = 0.035;
+        const damping = 0.045;
+        const spread = 0.28;
+
+        for (let f = 0; f < this.wavePoints.length; f++) {
+            const pts = this.wavePoints[f];
+            if (!pts) continue;
+
+            for (let i = 0; i < pts.length; i++) {
+                const force = -k * pts[i].y - pts[i].vy * damping;
+                pts[i].vy += force;
+                pts[i].y += pts[i].vy;
+            }
+
+            for (let pass = 0; pass < 2; pass++) {
+                for (let i = 0; i < pts.length; i++) {
+                    if (i > 0) {
+                        const dL = spread * (pts[i].y - pts[i - 1].y);
+                        pts[i - 1].vy += dL;
+                        pts[i - 1].y += dL;
+                    }
+                    if (i < pts.length - 1) {
+                        const dR = spread * (pts[i].y - pts[i + 1].y);
+                        pts[i + 1].vy += dR;
+                        pts[i + 1].y += dR;
+                    }
+                }
+            }
+        }
+
+        // 2. Анимация переливания
         if (this.pourAnimation) {
             const p = this.pourAnimation;
             const fromBox = this.layout[p.fromIdx];
 
             if (p.phase === 'move') {
-                p.progress += dt * 4.0;
+                p.progress += dt * 4.2;
                 if (p.progress >= 1) {
                     p.progress = 1;
                     p.phase = 'pouring';
@@ -387,21 +445,39 @@ class PotionGame {
                 fromBox.angle = p.targetAngle * ease;
             } else if (p.phase === 'pouring') {
                 p.pourTimer = (p.pourTimer || 0) + dt;
-                const duration = 0.45 * p.count;
+                const duration = 0.5 * p.count;
                 p.pourFraction = Math.min(1, p.pourTimer / duration);
 
-                // Создаем брызги и пену в горлышке целевой колбы
-                if (Math.random() < 0.6) {
-                    const toBox = this.layout[p.toIdx];
+                if (Math.random() < 0.4) {
+                    this.disturbWaves(p.toIdx, 2.5);
+                }
+
+                const toBox = this.layout[p.toIdx];
+                const currentHeight = (this.flasks[p.toIdx].length + p.pourFraction * p.count) * (toBox.h * 0.78 / FLASK_CAPACITY);
+                const impactY = toBox.y + toBox.h * 0.5 - Math.max(12, currentHeight);
+
+                if (Math.random() < 0.5) {
                     this.splashParticles.push({
-                        x: toBox.x + (Math.random() - 0.5) * 12,
-                        y: toBox.y + toBox.h * 0.5 - (this.flasks[p.toIdx].length + p.pourFraction * p.count) * (toBox.h * 0.78 / FLASK_CAPACITY),
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: -1 - Math.random() * 2,
-                        radius: 1.5 + Math.random() * 2,
+                        x: toBox.x + (Math.random() - 0.5) * 16,
+                        y: impactY,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: -2 - Math.random() * 2.5,
+                        radius: 1.5 + Math.random() * 2.5,
                         color: POTION_PALETTE[p.colorId].topColor,
                         alpha: 1,
-                        decay: 0.05
+                        decay: 0.055
+                    });
+                }
+
+                if (Math.random() < 0.25) {
+                    this.foamRipples.push({
+                        x: toBox.x,
+                        y: impactY,
+                        rx: 4,
+                        ry: 1.5,
+                        maxR: 18,
+                        alpha: 0.8,
+                        color: POTION_PALETTE[p.colorId].topColor
                     });
                 }
 
@@ -411,7 +487,6 @@ class PotionGame {
                     p.progress = 0;
                     window.soundEngine.stopPour();
 
-                    // Фактически переносим слои
                     for (let i = 0; i < p.count; i++) {
                         if (this.flasks[p.fromIdx].length > 0) {
                             const liquid = this.flasks[p.fromIdx].pop();
@@ -419,10 +494,10 @@ class PotionGame {
                         }
                     }
 
-                    // Проверяем заполнение
                     const toFlask = this.flasks[p.toIdx];
                     if (toFlask.length === FLASK_CAPACITY && toFlask.every(c => c === toFlask[0])) {
                         window.soundEngine.playFlaskComplete();
+                        this.disturbWaves(p.toIdx, 15);
                     }
 
                     if (this.checkWinCondition()) {
@@ -430,7 +505,7 @@ class PotionGame {
                     }
                 }
             } else if (p.phase === 'return') {
-                p.progress += dt * 4.0;
+                p.progress += dt * 4.2;
                 if (p.progress >= 1) {
                     fromBox.x = p.originX;
                     fromBox.y = p.originY;
@@ -449,16 +524,14 @@ class PotionGame {
             }
         }
 
-        // Плавный подъем выбранной колбы
         for (let i = 0; i < this.layout.length; i++) {
             const b = this.layout[i];
             if (this.pourAnimation && (i === this.pourAnimation.fromIdx)) continue;
             const isSelected = (this.selectedFlaskIndex === i);
-            const targetOffsetY = isSelected ? -20 : 0;
+            const targetOffsetY = isSelected ? -22 : 0;
             b.offsetY += (targetOffsetY - b.offsetY) * (dt * 12);
         }
 
-        // Обновление искр
         for (let i = this.sparkles.length - 1; i >= 0; i--) {
             const sp = this.sparkles[i];
             sp.x += sp.vx;
@@ -467,7 +540,6 @@ class PotionGame {
             if (sp.alpha <= 0) this.sparkles.splice(i, 1);
         }
 
-        // Обновление брызг
         for (let i = this.splashParticles.length - 1; i >= 0; i--) {
             const sp = this.splashParticles[i];
             sp.x += sp.vx;
@@ -475,17 +547,23 @@ class PotionGame {
             sp.alpha -= sp.decay;
             if (sp.alpha <= 0) this.splashParticles.splice(i, 1);
         }
+
+        for (let i = this.foamRipples.length - 1; i >= 0; i--) {
+            const r = this.foamRipples[i];
+            r.rx += dt * 35;
+            r.ry += dt * 12;
+            r.alpha -= dt * 1.5;
+            if (r.alpha <= 0 || r.rx > r.maxR) this.foamRipples.splice(i, 1);
+        }
     }
 
     render() {
         this.ctx.clearRect(0, 0, this.width, this.height);
 
-        // Рисуем неподвижные колбы
         for (let i = 0; i < this.layout.length; i++) {
             if (this.pourAnimation && i === this.pourAnimation.fromIdx) continue;
             const b = this.layout[i];
             
-            // Если в целевую колбу льется жидкость, рассчитываем динамический уровень
             let dynamicFill = 0;
             let dynamicColor = null;
             if (this.pourAnimation && i === this.pourAnimation.toIdx && this.pourAnimation.phase === 'pouring') {
@@ -493,15 +571,13 @@ class PotionGame {
                 dynamicColor = this.pourAnimation.colorId;
             }
 
-            this.drawFlask(b.x, b.y + b.offsetY, b.w, b.h, this.flasks[i], b.angle, i === this.selectedFlaskIndex, dynamicFill, dynamicColor);
+            this.drawRealisticFlask(i, b.x, b.y + b.offsetY, b.w, b.h, this.flasks[i], b.angle, i === this.selectedFlaskIndex, dynamicFill, dynamicColor);
         }
 
-        // Рисуем струю жидкости
         if (this.pourAnimation && this.pourAnimation.streamActive) {
-            this.drawPourStream();
+            this.drawRealisticStream();
         }
 
-        // Рисуем наклоненную колбу поверх остальных
         if (this.pourAnimation) {
             const p = this.pourAnimation;
             const b = this.layout[p.fromIdx];
@@ -509,14 +585,13 @@ class PotionGame {
             if (p.phase === 'pouring') {
                 dynamicDrain = p.pourFraction * p.count;
             }
-            this.drawFlask(b.x, b.y, b.w, b.h, this.flasks[p.fromIdx], b.angle, false, -dynamicDrain, p.colorId);
+            this.drawRealisticFlask(p.fromIdx, b.x, b.y, b.w, b.h, this.flasks[p.fromIdx], b.angle, false, -dynamicDrain, p.colorId);
         }
 
-        // Брызги и искры
         this.drawParticles();
     }
 
-    drawFlask(x, y, w, h, layers, angle, isSelected, dynamicVolumeChange = 0, dynamicColorId = null) {
+    drawRealisticFlask(flaskIdx, x, y, w, h, layers, angle, isSelected, dynamicVolumeChange = 0, dynamicColorId = null) {
         const ctx = this.ctx;
         ctx.save();
         ctx.translate(x, y);
@@ -526,42 +601,36 @@ class PotionGame {
         const halfH = h / 2;
         const neckW = w * 0.44;
         const neckH = h * 0.22;
-        const radius = w * 0.28;
+        const radius = w * 0.3;
 
-        // 1. Тень
         if (!angle) {
             ctx.save();
             ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
             ctx.beginPath();
-            ctx.ellipse(0, halfH + 8, halfW * 0.85, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, halfH + 9, halfW * 0.88, 8, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
-        // 2. Клиппинг колбы для жидкости
         ctx.save();
         this.createFlaskPath(ctx, halfW, halfH, neckW, neckH, radius);
         ctx.clip();
 
-        // Расчет слоев жидкости с учетом динамического перелива
         const segH = (h - neckH) / FLASK_CAPACITY;
         const bodyBottom = halfH;
 
-        // Создаем временную копию слоев для отрисовки
         let displayLayers = [...layers];
         let fractionalTopHeight = 1.0;
 
         if (dynamicVolumeChange < 0) {
-            // Опустошение верхней колбы
             const drainCount = -dynamicVolumeChange;
             const fullDrops = Math.floor(drainCount);
             const partial = drainCount - fullDrops;
             for (let k = 0; k < fullDrops; k++) {
                 if (displayLayers.length > 0) displayLayers.pop();
             }
-            fractionalTopHeight = 1.0 - partial;
+            fractionalTopHeight = Math.max(0, 1.0 - partial);
         } else if (dynamicVolumeChange > 0) {
-            // Наполнение целевой колбы
             const addCount = dynamicVolumeChange;
             const fullAdds = Math.floor(addCount);
             const partial = addCount - fullAdds;
@@ -574,88 +643,86 @@ class PotionGame {
             }
         }
 
-        // Если колба наклонена, мы поворачиваем градиент и уровень жидкости горизонтально земле!
-        for (let i = 0; i < displayLayers.length; i++) {
-            const isTopLayer = (i === displayLayers.length - 1);
-            const curSegH = (isTopLayer && fractionalTopHeight < 1.0) ? (segH * fractionalTopHeight) : segH;
-            
-            const colorId = displayLayers[i];
-            const potion = POTION_PALETTE[colorId] || POTION_PALETTE.ruby;
-            const yBottom = bodyBottom - i * segH;
-            const yTop = yBottom - curSegH;
+        if (angle) {
+            this.drawTiltedLiquidDrop(ctx, halfW, halfH, neckW, neckH, displayLayers, fractionalTopHeight);
+        } else {
+            for (let i = 0; i < displayLayers.length; i++) {
+                const isTopLayer = (i === displayLayers.length - 1);
+                const curSegH = (isTopLayer && fractionalTopHeight < 1.0) ? (segH * fractionalTopHeight) : segH;
+                const colorId = displayLayers[i];
+                const potion = POTION_PALETTE[colorId] || POTION_PALETTE.ruby;
 
-            // Если колба наклонена, зеркало жидкости остается ровным
-            ctx.save();
-            if (angle) {
-                // При наклоне жидкость стекает к стенке
-                ctx.rotate(-angle * 0.45);
-            }
+                const yBottom = bodyBottom - i * segH;
+                const yTop = yBottom - curSegH;
 
-            const grad = ctx.createLinearGradient(-halfW, yTop, halfW, yBottom);
-            grad.addColorStop(0, potion.topColor);
-            grad.addColorStop(1, potion.bottomColor);
+                const grad = ctx.createLinearGradient(0, yTop, 0, yBottom);
+                grad.addColorStop(0, potion.topColor);
+                grad.addColorStop(0.7, potion.bottomColor);
+                grad.addColorStop(1, '#050208');
 
-            ctx.fillStyle = grad;
-            ctx.fillRect(-halfW - 10, yTop, w + 20, curSegH + 2);
+                ctx.fillStyle = grad;
+                ctx.fillRect(-halfW - 5, yTop, w + 10, curSegH + 1);
 
-            ctx.fillStyle = potion.glowColor;
-            ctx.fillRect(-halfW - 10, yTop, w + 20, curSegH + 2);
+                const coreGrad = ctx.createRadialGradient(0, yTop + curSegH * 0.5, 2, 0, yTop + curSegH * 0.5, halfW);
+                coreGrad.addColorStop(0, potion.glowColor);
+                coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = coreGrad;
+                ctx.fillRect(-halfW - 5, yTop, w + 10, curSegH + 1);
 
-            if (!angle) {
                 this.drawBubblesInLayer(ctx, -halfW, halfW, yTop, yBottom, potion.bubbleColor);
+
+                if (isTopLayer) {
+                    this.drawSpringWaveSurface(ctx, flaskIdx, -halfW * 0.88, halfW * 0.88, yTop, potion);
+                }
             }
-
-            ctx.restore();
         }
 
-        // Верхний мениск жидкости
-        if (displayLayers.length > 0 && !angle) {
-            const totalHeight = (displayLayers.length - 1 + fractionalTopHeight) * segH;
-            const topY = bodyBottom - totalHeight;
-            const topPotion = POTION_PALETTE[displayLayers[displayLayers.length - 1]] || POTION_PALETTE.ruby;
-            ctx.fillStyle = topPotion.topColor;
-            ctx.beginPath();
-            ctx.ellipse(0, topY, halfW * 0.88, 3.5, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
+        ctx.restore();
 
-        ctx.restore(); // Сброс клипа
-
-        // 3. Стеклянный контур, блики и пробка
         ctx.save();
         this.createFlaskPath(ctx, halfW, halfH, neckW, neckH, radius);
         
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        const glassGrad = ctx.createLinearGradient(-halfW, 0, halfW, 0);
+        glassGrad.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+        glassGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.02)');
+        glassGrad.addColorStop(0.8, 'rgba(0, 0, 0, 0.05)');
+        glassGrad.addColorStop(1, 'rgba(255, 255, 255, 0.08)');
+        ctx.fillStyle = glassGrad;
         ctx.fill();
 
         if (isSelected) {
             ctx.strokeStyle = '#ffd166';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 3.5;
             ctx.shadowColor = '#ffd166';
-            ctx.shadowBlur = 16;
+            ctx.shadowBlur = 18;
         } else {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            ctx.shadowBlur = 4;
+            ctx.lineWidth = 2.2;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 5;
         }
         ctx.stroke();
 
-        // Блик стекла
         ctx.beginPath();
-        ctx.moveTo(-halfW + 6, -halfH + neckH + 12);
+        ctx.moveTo(-halfW + 6, -halfH + neckH + 14);
         ctx.lineTo(-halfW + 6, halfH - radius);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        // Горлышко
         ctx.beginPath();
-        ctx.ellipse(0, -halfH, neckW / 2 + 2, 4, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.moveTo(halfW - 6, -halfH + neckH + 16);
+        ctx.lineTo(halfW - 6, halfH - radius);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.ellipse(0, -halfH, neckW / 2 + 2, 4.5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -678,6 +745,86 @@ class PotionGame {
         ctx.closePath();
     }
 
+    drawTiltedLiquidDrop(ctx, halfW, halfH, neckW, neckH, layers, fractionalTopHeight) {
+        if (layers.length === 0) return;
+        const totalAmount = Math.max(0.2, (layers.length - 1 + fractionalTopHeight) / FLASK_CAPACITY);
+        const topColorId = layers[layers.length - 1];
+        const potion = POTION_PALETTE[topColorId] || POTION_PALETTE.ruby;
+
+        ctx.save();
+        ctx.beginPath();
+        
+        ctx.moveTo(neckW / 2, -halfH);
+        ctx.lineTo(halfW, -halfH + neckH + 12);
+        ctx.lineTo(halfW, halfH - 10);
+        ctx.quadraticCurveTo(halfW * (1 - totalAmount * 0.8), halfH, -halfW * (totalAmount * 0.5), halfH * 0.3);
+        ctx.quadraticCurveTo(halfW * 0.1, -halfH * 0.2, 0, -halfH);
+        ctx.closePath();
+
+        const dropGrad = ctx.createRadialGradient(halfW * 0.4, 0, 5, halfW * 0.2, 0, halfW * 1.5);
+        dropGrad.addColorStop(0, potion.topColor);
+        dropGrad.addColorStop(0.6, potion.bottomColor);
+        dropGrad.addColorStop(1, '#050208');
+        ctx.fillStyle = dropGrad;
+        ctx.fill();
+
+        ctx.fillStyle = potion.glowColor;
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-halfW * (totalAmount * 0.5), halfH * 0.3);
+        ctx.quadraticCurveTo(halfW * 0.1, -halfH * 0.2, 0, -halfH);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    drawSpringWaveSurface(ctx, flaskIdx, leftX, rightX, baseY, potion) {
+        const pts = this.wavePoints[flaskIdx] || [];
+        const count = pts.length;
+        if (count < 2) return;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(leftX, baseY + (pts[0] ? pts[0].y : 0));
+
+        const step = (rightX - leftX) / (count - 1);
+        for (let i = 1; i < count; i++) {
+            const px = leftX + i * step;
+            const py = baseY + pts[i].y;
+            const prevX = leftX + (i - 1) * step;
+            const prevY = baseY + pts[i - 1].y;
+            const cx = (prevX + px) / 2;
+            const cy = (prevY + py) / 2;
+            ctx.quadraticCurveTo(prevX, prevY, cx, cy);
+        }
+        ctx.lineTo(rightX, baseY + (pts[count - 1] ? pts[count - 1].y : 0));
+        ctx.lineTo(rightX, baseY + 10);
+        ctx.lineTo(leftX, baseY + 10);
+        ctx.closePath();
+        ctx.fillStyle = potion.topColor;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(leftX, baseY + (pts[0] ? pts[0].y : 0));
+        for (let i = 1; i < count; i++) {
+            const px = leftX + i * step;
+            const py = baseY + pts[i].y;
+            const prevX = leftX + (i - 1) * step;
+            const prevY = baseY + pts[i - 1].y;
+            const cx = (prevX + px) / 2;
+            const cy = (prevY + py) / 2;
+            ctx.quadraticCurveTo(prevX, prevY, cx, cy);
+        }
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
     drawBubblesInLayer(ctx, left, right, top, bottom, color) {
         const time = performance.now() * 0.001;
         ctx.fillStyle = color;
@@ -691,45 +838,55 @@ class PotionGame {
         }
     }
 
-    drawPourStream() {
+    drawRealisticStream() {
         const ctx = this.ctx;
         const p = this.pourAnimation;
         const fromBox = this.layout[p.fromIdx];
         const toBox = this.layout[p.toIdx];
         const potion = POTION_PALETTE[p.colorId] || POTION_PALETTE.ruby;
 
-        // Точные мировые координаты носика наклоненной колбы
         const isTargetToRight = toBox.x >= fromBox.x;
-        const lipLocalX = isTargetToRight ? (fromBox.w * 0.2) : -(fromBox.w * 0.2);
+        const lipLocalX = isTargetToRight ? (fromBox.w * 0.22) : -(fromBox.w * 0.22);
         const lipLocalY = -fromBox.h * 0.5;
 
-        const streamStartX = fromBox.x + lipLocalX * Math.cos(fromBox.angle) - lipLocalY * Math.sin(fromBox.angle);
-        const streamStartY = fromBox.y + lipLocalX * Math.sin(fromBox.angle) + lipLocalY * Math.cos(fromBox.angle);
+        const startX = fromBox.x + lipLocalX * Math.cos(fromBox.angle) - lipLocalY * Math.sin(fromBox.angle);
+        const startY = fromBox.y + lipLocalX * Math.sin(fromBox.angle) + lipLocalY * Math.cos(fromBox.angle);
 
-        // Горлышко целевой колбы
-        const streamTargetX = toBox.x;
-        const currentFillHeight = (this.flasks[p.toIdx].length + p.pourFraction * p.count) * (toBox.h * 0.78 / FLASK_CAPACITY);
-        const streamTargetY = toBox.y + toBox.h * 0.5 - Math.max(10, currentFillHeight);
+        const targetX = toBox.x;
+        const currentHeight = (this.flasks[p.toIdx].length + p.pourFraction * p.count) * (toBox.h * 0.78 / FLASK_CAPACITY);
+        const targetY = toBox.y + toBox.h * 0.5 - Math.max(12, currentHeight);
+
+        const cpX = startX + (targetX - startX) * 0.25;
+        const cpY = Math.min(startY, targetY) - 18;
 
         ctx.save();
-        ctx.strokeStyle = potion.topColor;
-        ctx.lineWidth = Math.min(8, fromBox.w * 0.16);
-        ctx.lineCap = 'round';
-        ctx.shadowColor = potion.topColor;
-        ctx.shadowBlur = 14;
+
+        const startW = 15;
+        const endW = 7.5;
 
         ctx.beginPath();
-        ctx.moveTo(streamStartX, streamStartY);
-        
-        // Красивая дуга Безье струи под действием гравитации
-        const cpX = streamStartX + (streamTargetX - streamStartX) * 0.25;
-        const cpY = Math.min(streamStartY, streamTargetY) - 15;
-        ctx.quadraticCurveTo(cpX, cpY, streamTargetX, streamTargetY);
-        ctx.stroke();
+        ctx.moveTo(startX - startW / 2, startY);
+        ctx.quadraticCurveTo(cpX - endW / 2, cpY, targetX - endW / 2, targetY);
+        ctx.lineTo(targetX + endW / 2, targetY);
+        ctx.quadraticCurveTo(cpX + endW / 2, cpY, startX + startW / 2, startY);
+        ctx.closePath();
 
-        // Белое мерцающее ядро струи
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 2.5;
+        const streamGrad = ctx.createLinearGradient(startX, startY, targetX, targetY);
+        streamGrad.addColorStop(0, potion.topColor);
+        streamGrad.addColorStop(0.5, potion.bottomColor);
+        streamGrad.addColorStop(1, potion.topColor);
+
+        ctx.fillStyle = streamGrad;
+        ctx.shadowColor = potion.topColor;
+        ctx.shadowBlur = 18;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.quadraticCurveTo(cpX, cpY, targetX, targetY);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 2.8;
+        ctx.lineCap = 'round';
         ctx.stroke();
 
         ctx.restore();
@@ -737,27 +894,39 @@ class PotionGame {
 
     drawParticles() {
         const ctx = this.ctx;
-        // Победные искры
+
         for (let sp of this.sparkles) {
             ctx.save();
             ctx.fillStyle = sp.color;
             ctx.globalAlpha = sp.alpha;
             ctx.shadowColor = sp.color;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.beginPath();
             ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
-        // Брызги переливания
         for (let sp of this.splashParticles) {
             ctx.save();
             ctx.fillStyle = sp.color;
             ctx.globalAlpha = sp.alpha;
+            ctx.shadowColor = sp.color;
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
             ctx.fill();
+            ctx.restore();
+        }
+
+        for (let r of this.foamRipples) {
+            ctx.save();
+            ctx.strokeStyle = r.color;
+            ctx.globalAlpha = r.alpha;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.ellipse(r.x, r.y, r.rx, r.ry, 0, 0, Math.PI * 2);
+            ctx.stroke();
             ctx.restore();
         }
     }
