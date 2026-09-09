@@ -371,6 +371,7 @@ class FlaskView {
     this.isSelected = false;
     this.isReceiving = false;
     this.isCapped = false;
+    this.corkDisplacement = 0;
 
     // Magical sparkles
     this.sparkles = [];
@@ -405,9 +406,9 @@ class FlaskView {
   }
 
   getSurfaceY() {
-    const layerH = (this.height - 24) / FLASK_CAP;
+    const layerH = (this.height - 26) / FLASK_CAP;
     const bottomY = this.height - 8;
-    return bottomY - this.layers.length * layerH;
+    return bottomY - this.layers.length * layerH - (this.corkDisplacement || 0);
   }
 
   topColor() {
@@ -595,31 +596,28 @@ class FlaskView {
     const cy = offsetY;
     const wRim = w * 0.55;
 
-    // Dimensions matching the inner neck contour with zero gaps:
-    const topCapW = wRim - 2.0;   // Cork head (~39.8px)
-    const mouthW = wRim - 3.5;    // Enters mouth opening (~38.3px)
-    const throatW = w / 2 - 2.8;  // Cylindrical throat (~35.2px)
+    // Proportions: compact cork that enters 3px into the potion
+    const topCapW = wRim - 2.0;   // Protruding head (~39.8px)
+    const mouthW = wRim - 3.5;    // Enters mouth (~38.3px)
+    const throatW = w / 2 - 2.8;  // Throat contour (~35.2px)
 
-    const yTop = cy - 7;          // Top head (7px above rim)
+    const yTop = cy - 5;          // Protrudes 5px above rim
     const yRim = cy + 2;          // Rim level
-    const yCollar = cy + 18;      // Collar transition
-    const yBot = cy + 25;         // Deep inside liquid
+    const yCollar = cy + 12;      // Collar transition
+    const yBot = cy + 18.5;       // Tip enters potion to y=18.5
+    const yWater = 15.5;          // Rest fluid surface level
 
-    // 1. Bottom shadow inside liquid
-    g.lineStyle(0);
-    g.beginFill(0x1a0f05, 0.5);
-    g.drawEllipse(0, yBot, throatW, 3.5);
-    g.endFill();
+    const topColor = this.layers.length > 0 ? PALETTE[this.topColor()] : null;
 
-    // 2. Main cork body (tapered to follow inner glass wall smoothly)
+    // 1. Main dry cork body (from top head down to liquid level)
     g.beginFill(0x9e6a38);
     g.moveTo(-topCapW, yTop);
     g.lineTo(-mouthW, yRim);
-    g.quadraticCurveTo(-throatW, cy + 8, -throatW, yCollar);
+    g.quadraticCurveTo(-throatW, cy + 7, -throatW, yCollar);
     g.lineTo(-throatW, yBot);
     g.arc(0, yBot, throatW, Math.PI, 0, true);
     g.lineTo(throatW, yCollar);
-    g.quadraticCurveTo(throatW, cy + 8, mouthW, yRim);
+    g.quadraticCurveTo(throatW, cy + 7, mouthW, yRim);
     g.lineTo(topCapW, yTop);
     g.closePath();
     g.endFill();
@@ -628,9 +626,9 @@ class FlaskView {
     g.beginFill(0x6e421a, 0.35);
     g.moveTo(-topCapW, yTop);
     g.lineTo(-mouthW, yRim);
-    g.quadraticCurveTo(-throatW, cy + 8, -throatW, yBot);
+    g.quadraticCurveTo(-throatW, cy + 7, -throatW, yBot);
     g.arc(0, yBot, throatW, Math.PI, Math.PI * 0.7, true);
-    g.lineTo(-throatW * 0.35, cy + 8);
+    g.lineTo(-throatW * 0.35, cy + 7);
     g.lineTo(-topCapW * 0.4, yTop);
     g.closePath();
     g.endFill();
@@ -640,36 +638,82 @@ class FlaskView {
     g.moveTo(topCapW * 0.6, yTop);
     g.lineTo(topCapW, yTop);
     g.lineTo(mouthW, yRim);
-    g.quadraticCurveTo(throatW, cy + 8, throatW, yBot);
+    g.quadraticCurveTo(throatW, cy + 7, throatW, yBot);
     g.lineTo(throatW * 0.65, yBot);
     g.closePath();
     g.endFill();
 
-    // Natural cork porous flecks / grain
+    // Natural cork porous flecks / grain in air portion
     g.lineStyle(1.4, 0x5a3212, 0.45);
-    g.moveTo(-mouthW * 0.45, yRim + 3); g.lineTo(-mouthW * 0.1, yRim + 3);
-    g.moveTo(mouthW * 0.15, yRim + 5); g.lineTo(mouthW * 0.55, yRim + 5);
-    g.moveTo(-throatW * 0.5, yCollar - 4); g.lineTo(-throatW * 0.15, yCollar - 4);
-    g.moveTo(throatW * 0.1, yCollar + 1); g.lineTo(throatW * 0.45, yCollar + 1);
-    g.moveTo(-throatW * 0.25, yBot - 3); g.lineTo(throatW * 0.2, yBot - 3);
+    g.moveTo(-mouthW * 0.4, yRim + 2); g.lineTo(-mouthW * 0.1, yRim + 2);
+    g.moveTo(mouthW * 0.15, yRim + 4); g.lineTo(mouthW * 0.5, yRim + 4);
+    g.moveTo(-throatW * 0.45, yCollar - 2); g.lineTo(-throatW * 0.1, yCollar - 2);
+    g.moveTo(throatW * 0.1, yCollar + 1); g.lineTo(throatW * 0.4, yCollar + 1);
+
+    // 2. Optical Submergence: The 3px tip inside potion is darkened and tinted by the potion color!
+    if (yBot > yWater && topColor) {
+      const subH = yBot - yWater;
+
+      // Dark wet wood base for submerged portion
+      g.lineStyle(0);
+      g.beginFill(0x4a250e, 0.55);
+      g.moveTo(-throatW, yWater);
+      g.lineTo(-throatW, yBot);
+      g.arc(0, yBot, throatW, Math.PI, 0, true);
+      g.lineTo(throatW, yWater);
+      g.closePath();
+      g.endFill();
+
+      // Deep saturated potion inner color tint
+      g.beginFill(topColor.inner, 0.68);
+      g.moveTo(-throatW, yWater);
+      g.lineTo(-throatW, yBot);
+      g.arc(0, yBot, throatW, Math.PI, 0, true);
+      g.lineTo(throatW, yWater);
+      g.closePath();
+      g.endFill();
+
+      // Potion vibrant hex overlay tint
+      g.beginFill(topColor.hex, 0.40);
+      g.moveTo(-throatW, yWater);
+      g.lineTo(-throatW, yBot);
+      g.arc(0, yBot, throatW, Math.PI, 0, true);
+      g.lineTo(throatW, yWater);
+      g.closePath();
+      g.endFill();
+
+      // Glowing liquid meniscus on the wood at waterline
+      g.lineStyle(1.8, topColor.glow, 0.85);
+      g.drawEllipse(0, yWater, throatW + 0.5, 2.2);
+      g.lineStyle(1.0, 0xffffff, 0.7);
+      g.drawEllipse(0, yWater - 0.4, throatW * 0.85, 1.4);
+
+      // Deep refractive drop shadow beneath submerged tip
+      g.lineStyle(0);
+      g.beginFill(0x0a0515, 0.45);
+      g.drawEllipse(0, yBot, throatW * 0.88, 2.4);
+      g.endFill();
+    }
 
     // 3. Top face of cork
     g.lineStyle(1.2, 0xba884e, 0.95);
     g.beginFill(0xab7742);
-    g.drawEllipse(0, yTop, topCapW, 4.2);
+    g.drawEllipse(0, yTop, topCapW, 4.0);
     g.endFill();
 
     // Top face light sheen
     g.lineStyle(0);
     g.beginFill(0xd29d63, 0.45);
-    g.drawEllipse(0, yTop - 0.5, topCapW * 0.72, 2.6);
+    g.drawEllipse(0, yTop - 0.5, topCapW * 0.72, 2.4);
     g.endFill();
   }
 
   uncapFlask() {
     this.isCapped = false;
+    this.corkDisplacement = 0;
     this.capGfx.clear();
     this.capParticlesGfx.clear();
+    this.drawLiquids();
   }
 
   async capFlask() {
@@ -681,9 +725,9 @@ class FlaskView {
       window.soundEngine.playCork();
     }
 
-    // Snappy drop animation into flask mouth (-40px down into neck 0px)
+    // Snappy drop animation into flask mouth (-38px down into neck 0px)
     const duration = 220;
-    const startY = -40;
+    const startY = -38;
     const startTime = performance.now();
 
     await new Promise(resolve => {
@@ -691,16 +735,25 @@ class FlaskView {
         const elapsed = now - startTime;
         const t = Math.min(1, elapsed / duration);
         // Snappy back-out settle
-        const c1 = 1.4;
+        const c1 = 1.35;
         const c3 = c1 + 1;
         const ease = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
         const curY = startY + (0 - startY) * ease;
+
+        // Dynamic fluid displacement: as cork enters liquid (last 35% of drop), liquid rises by 2.5px
+        if (t > 0.65) {
+          const dipProgress = (t - 0.65) / 0.35;
+          this.corkDisplacement = dipProgress * 2.5;
+          this.drawLiquids();
+        }
 
         this.drawCork(curY);
 
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
+          this.corkDisplacement = 2.5;
+          this.drawLiquids();
           this.drawCork(0);
           resolve();
         }
@@ -767,7 +820,7 @@ class FlaskView {
 
     const w = this.width;
     const h = this.height;
-    const layerH = (h - 24) / FLASK_CAP;
+    const layerH = (h - 26) / FLASK_CAP;
     const bottomY = h - 8;
 
     // --- 1. Merge adjacent same-color layers into unified chunks ---
@@ -813,9 +866,9 @@ class FlaskView {
       boundaries.push(curY);
     }
 
-    // Nominal top surface center
+    // Nominal top surface center (rises slightly by corkDisplacement upon capping)
     const topIdx = chunks.length - 1;
-    const nominalTopY = boundaries[chunks.length];
+    let nominalTopY = boundaries[chunks.length] - (this.corkDisplacement || 0);
     const nominalLipY = nominalTopY - spoutX * slope;
     const targetLipY = 4; // Firmly lock fluid to the pouring mouth rim
 
