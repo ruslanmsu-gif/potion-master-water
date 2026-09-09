@@ -57,21 +57,38 @@ class SoundEngine {
         osc.stop(this.ctx.currentTime + 0.08);
     }
 
-    // Сочный щелчок закрытия деревянной пробки
+    // Сочный реалистичный деревянный «чпок» винной/алхимической пробки
     playCork() {
         if (this.muted) return;
         this.init();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(360, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.08);
+        const t = this.ctx.currentTime;
+
+        // 1. Резкий щелчок контакта (transient pop)
+        const oscPop = this.ctx.createOscillator();
+        const gainPop = this.ctx.createGain();
+        oscPop.type = 'triangle';
+        oscPop.frequency.setValueAtTime(540, t);
+        oscPop.frequency.exponentialRampToValueAtTime(110, t + 0.04);
+        gainPop.gain.setValueAtTime(0.5, t);
+        gainPop.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        oscPop.connect(gainPop);
+        gainPop.connect(this.ctx.destination);
+        oscPop.start(t);
+        oscPop.stop(t + 0.04);
+
+        // 2. Глухой деревянный резонанс сосуда (wooden cavity thud)
+        const oscThud = this.ctx.createOscillator();
+        const gainThud = this.ctx.createGain();
+        oscThud.type = 'sine';
+        oscThud.frequency.setValueAtTime(190, t + 0.005);
+        oscThud.frequency.exponentialRampToValueAtTime(70, t + 0.075);
+        gainThud.gain.setValueAtTime(0.01, t);
+        gainThud.gain.linearRampToValueAtTime(0.55, t + 0.006);
+        gainThud.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        oscThud.connect(gainThud);
+        gainThud.connect(this.ctx.destination);
+        oscThud.start(t);
+        oscThud.stop(t + 0.08);
     }
 
     // Начало реалистичного переливания жидкости (ASMR бульканье)

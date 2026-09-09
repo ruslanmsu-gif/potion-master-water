@@ -358,8 +358,8 @@ class FlaskView {
     this.container.addChild(this.glassBody);
     this.container.addChild(this.maskGfx);
     this.container.addChild(this.liquidContainer);
-    this.container.addChild(this.glassHighlights);
     this.container.addChild(this.capGfx);
+    this.container.addChild(this.glassHighlights);
     this.container.addChild(this.capParticlesGfx);
 
     this.width = 76;
@@ -565,66 +565,79 @@ class FlaskView {
     g.clear();
 
     const w = this.width;
-    const wRim = w * 0.55;
     const cy = offsetY;
 
-    // 1. Drop shadow beneath the cork cap
+    // Authentic tapered wooden cork stopper sitting snugly inside the glass neck
+    const topW = w * 0.40;   // Top width at protruding head
+    const neckW = w * 0.38;  // Width right at rim entrance
+    const botW = w * 0.33;   // Bottom width deep inside neck
+
+    const yTop = cy - 6;     // Protrudes slightly above rim
+    const yRim = cy + 2;     // Level of flask mouth rim
+    const yBot = cy + 22;    // Deep inside neck
+
+    // 1. Shadow underneath the bottom of the cork inside liquid
     g.lineStyle(0);
-    g.beginFill(0x1a0f05, 0.4);
-    g.drawEllipse(0, cy + 3, wRim * 0.85, 4);
+    g.beginFill(0x1a0f05, 0.45);
+    g.drawEllipse(0, yBot, botW, 3.5);
     g.endFill();
 
-    // 2. Cork plug entering the flask throat
-    const plugTopW = wRim * 0.76;
-    const plugBotW = wRim * 0.62;
-    const plugTopY = cy + 2;
-    const plugBotY = cy + 18;
-
-    g.beginFill(0x825226);
+    // 2. Main cork body (tapered trapezoid from top to bottom)
+    g.beginFill(0x996633);
     g.drawPolygon([
-      -plugTopW, plugTopY,
-       plugTopW, plugTopY,
-       plugBotW, plugBotY,
-      -plugBotW, plugBotY
+      -topW, yTop,
+       topW, yTop,
+       neckW, yRim,
+       botW, yBot,
+      -botW, yBot,
+      -neckW, yRim
     ]);
     g.endFill();
 
-    // Plug bottom curve
-    g.beginFill(0x663e18);
-    g.drawEllipse(0, plugBotY, plugBotW, 3.5);
+    // Bottom rounded contour of cork
+    g.beginFill(0x7a4d22);
+    g.drawEllipse(0, yBot, botW, 3.5);
     g.endFill();
 
-    // Cork texture details
-    g.lineStyle(1.2, 0x5a3312, 0.4);
-    g.moveTo(-plugTopW * 0.4, plugTopY + 5);
-    g.lineTo(-plugBotW * 0.3, plugBotY - 3);
-    g.moveTo(plugTopW * 0.3, plugTopY + 4);
-    g.lineTo(plugBotW * 0.2, plugBotY - 4);
+    // Left side depth shading
+    g.beginFill(0x663d18, 0.35);
+    g.drawPolygon([
+      -topW, yTop,
+      -topW * 0.5, yTop,
+      -botW * 0.5, yBot,
+      -botW, yBot
+    ]);
+    g.endFill();
 
-    // 3. Cork Head (wooden stopper head crowning the rim)
-    const capW = wRim * 0.86;
+    // Right side subtle light reflection
+    g.beginFill(0xc28d53, 0.25);
+    g.drawPolygon([
+      topW * 0.6, yTop,
+      topW, yTop,
+      botW, yBot,
+      botW * 0.6, yBot
+    ]);
+    g.endFill();
+
+    // 3. Realistic horizontal cork porous grain flecks
+    g.lineStyle(1.2, 0x5a3414, 0.4);
+    g.moveTo(-topW * 0.4, yTop + 3); g.lineTo(-topW * 0.1, yTop + 3);
+    g.moveTo(topW * 0.1, yRim + 3); g.lineTo(topW * 0.45, yRim + 3);
+    g.moveTo(-neckW * 0.5, yRim + 8); g.lineTo(-neckW * 0.2, yRim + 8);
+    g.moveTo(-botW * 0.2, yRim + 13); g.lineTo(botW * 0.25, yRim + 13);
+    g.moveTo(botW * 0.1, yBot - 3); g.lineTo(botW * 0.35, yBot - 3);
+
+    // 4. Flat beveled top of cork
+    g.lineStyle(1, 0xb8854c, 0.9);
+    g.beginFill(0xab7742);
+    g.drawEllipse(0, yTop, topW, 3.8);
+    g.endFill();
+
+    // Top face highlight
     g.lineStyle(0);
-    g.beginFill(0x9c6836);
-    g.drawRoundedRect(-capW, cy - 8, capW * 2, 10, 4);
+    g.beginFill(0xc9945b, 0.5);
+    g.drawEllipse(0, yTop - 0.5, topW * 0.75, 2.4);
     g.endFill();
-
-    // Cap top dome
-    g.beginFill(0xb37a44);
-    g.drawEllipse(0, cy - 8, capW, 4.5);
-    g.endFill();
-
-    // Golden decorative ring around cork head
-    g.lineStyle(2, 0xffd700, 0.95);
-    g.drawEllipse(0, cy - 2, capW + 1, 4.5);
-
-    // Golden jewel knob on top
-    g.lineStyle(1, 0xffea00, 1);
-    g.beginFill(0xffd700);
-    g.drawCircle(0, cy - 12, 3.5);
-    g.endFill();
-
-    // Specular star shine on the gold knob
-    this.drawStar(g, 0, cy - 12, 2.5, 0xffffff);
   }
 
   uncapFlask() {
@@ -637,27 +650,22 @@ class FlaskView {
     if (this.isCapped) return;
     this.isCapped = true;
 
-    // Trigger audio feedback
-    if (window.soundEngine) {
-      if (typeof window.soundEngine.playCork === 'function') {
-        window.soundEngine.playCork();
-      }
-      if (typeof window.soundEngine.playFlaskComplete === 'function') {
-        setTimeout(() => window.soundEngine.playFlaskComplete(), 70);
-      }
+    // Trigger ONLY the crisp wooden pop sound — NO harp/melody
+    if (window.soundEngine && typeof window.soundEngine.playCork === 'function') {
+      window.soundEngine.playCork();
     }
 
-    // Drop animation from above flask mouth (-48px) down into rim (0px) with back-out bounce
-    const duration = 280;
-    const startY = -48;
+    // Snappy drop animation into flask mouth (-40px down into neck 0px)
+    const duration = 220;
+    const startY = -40;
     const startTime = performance.now();
 
     await new Promise(resolve => {
       const step = (now) => {
         const elapsed = now - startTime;
         const t = Math.min(1, elapsed / duration);
-        // Back ease out (subtle overshoot and snap)
-        const c1 = 1.70158;
+        // Snappy back-out settle
+        const c1 = 1.4;
         const c3 = c1 + 1;
         const ease = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
         const curY = startY + (0 - startY) * ease;
@@ -674,7 +682,7 @@ class FlaskView {
       requestAnimationFrame(step);
     });
 
-    // Golden sparkles bursting left and right from the rim
+    // Golden sparkles bursting from the seal
     this.spawnCapSparkles();
   }
 
