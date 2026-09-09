@@ -205,7 +205,7 @@ class GameEngine {
   }
 
   onFlaskClicked(flask) {
-    if (this.isBusy) return;
+    if (this.isBusy || flask.isCapped) return;
 
     if (!this.selectedFlask) {
       if (flask.layers.length > 0) {
@@ -249,6 +249,11 @@ class GameEngine {
 
     await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
 
+    // If target flask is fully solved with 4 same-color layers, seal it with magical cork
+    if (to.isCompletedFull() && !to.isCapped) {
+      await to.capFlask();
+    }
+
     this.isBusy = false;
     this.checkWinCondition();
   }
@@ -279,6 +284,10 @@ class GameEngine {
     const last = this.undoStack.pop();
     const fromFlask = this.flasks[last.fromIndex];
     const toFlask = this.flasks[last.toIndex];
+
+    if (toFlask.isCapped) {
+      toFlask.uncapFlask();
+    }
 
     for (let i = 0; i < last.amount; i++) {
       toFlask.layers.pop();
@@ -343,10 +352,15 @@ class FlaskView {
     this.liquidContainer.addChild(this.waveGfx);
     this.liquidContainer.addChild(this.sparklesGfx);
 
+    this.capGfx = new PIXI.Graphics();
+    this.capParticlesGfx = new PIXI.Graphics();
+
     this.container.addChild(this.glassBody);
     this.container.addChild(this.maskGfx);
     this.container.addChild(this.liquidContainer);
     this.container.addChild(this.glassHighlights);
+    this.container.addChild(this.capGfx);
+    this.container.addChild(this.capParticlesGfx);
 
     this.width = 76;
     this.height = 215;
@@ -354,6 +368,7 @@ class FlaskView {
     this.baseY = 0;
     this.isSelected = false;
     this.isReceiving = false;
+    this.isCapped = false;
 
     // Magical sparkles
     this.sparkles = [];
@@ -410,6 +425,7 @@ class FlaskView {
 
   canPourInto(target) {
     if (this === target) return false;
+    if (this.isCapped || target.isCapped) return false;
     if (this.layers.length === 0) return false;
     if (target.layers.length >= FLASK_CAP) return false;
     if (target.layers.length === 0) return true;
@@ -425,6 +441,12 @@ class FlaskView {
   isSolved() {
     if (this.layers.length === 0) return true;
     if (this.layers.length < FLASK_CAP) return false;
+    const first = this.layers[0];
+    return this.layers.every(c => c === first);
+  }
+
+  isCompletedFull() {
+    if (this.layers.length !== FLASK_CAP) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
@@ -536,6 +558,170 @@ class FlaskView {
     g.lineStyle(1.2, color, 0.95);
     g.moveTo(cx - size, cy); g.lineTo(cx + size, cy);
     g.moveTo(cx, cy - size); g.lineTo(cx, cy + size);
+  }
+
+  drawCork(offsetY = 0) {
+    const g = this.capGfx;
+    g.clear();
+
+    const w = this.width;
+    const wRim = w * 0.55;
+    const cy = offsetY;
+
+    // 1. Drop shadow beneath the cork cap
+    g.lineStyle(0);
+    g.beginFill(0x1a0f05, 0.4);
+    g.drawEllipse(0, cy + 3, wRim * 0.85, 4);
+    g.endFill();
+
+    // 2. Cork plug entering the flask throat
+    const plugTopW = wRim * 0.76;
+    const plugBotW = wRim * 0.62;
+    const plugTopY = cy + 2;
+    const plugBotY = cy + 18;
+
+    g.beginFill(0x825226);
+    g.drawPolygon([
+      -plugTopW, plugTopY,
+       plugTopW, plugTopY,
+       plugBotW, plugBotY,
+      -plugBotW, plugBotY
+    ]);
+    g.endFill();
+
+    // Plug bottom curve
+    g.beginFill(0x663e18);
+    g.drawEllipse(0, plugBotY, plugBotW, 3.5);
+    g.endFill();
+
+    // Cork texture details
+    g.lineStyle(1.2, 0x5a3312, 0.4);
+    g.moveTo(-plugTopW * 0.4, plugTopY + 5);
+    g.lineTo(-plugBotW * 0.3, plugBotY - 3);
+    g.moveTo(plugTopW * 0.3, plugTopY + 4);
+    g.lineTo(plugBotW * 0.2, plugBotY - 4);
+
+    // 3. Cork Head (wooden stopper head crowning the rim)
+    const capW = wRim * 0.86;
+    g.lineStyle(0);
+    g.beginFill(0x9c6836);
+    g.drawRoundedRect(-capW, cy - 8, capW * 2, 10, 4);
+    g.endFill();
+
+    // Cap top dome
+    g.beginFill(0xb37a44);
+    g.drawEllipse(0, cy - 8, capW, 4.5);
+    g.endFill();
+
+    // Golden decorative ring around cork head
+    g.lineStyle(2, 0xffd700, 0.95);
+    g.drawEllipse(0, cy - 2, capW + 1, 4.5);
+
+    // Golden jewel knob on top
+    g.lineStyle(1, 0xffea00, 1);
+    g.beginFill(0xffd700);
+    g.drawCircle(0, cy - 12, 3.5);
+    g.endFill();
+
+    // Specular star shine on the gold knob
+    this.drawStar(g, 0, cy - 12, 2.5, 0xffffff);
+  }
+
+  uncapFlask() {
+    this.isCapped = false;
+    this.capGfx.clear();
+    this.capParticlesGfx.clear();
+  }
+
+  async capFlask() {
+    if (this.isCapped) return;
+    this.isCapped = true;
+
+    // Trigger audio feedback
+    if (window.soundEngine) {
+      if (typeof window.soundEngine.playCork === 'function') {
+        window.soundEngine.playCork();
+      }
+      if (typeof window.soundEngine.playFlaskComplete === 'function') {
+        setTimeout(() => window.soundEngine.playFlaskComplete(), 70);
+      }
+    }
+
+    // Drop animation from above flask mouth (-48px) down into rim (0px) with back-out bounce
+    const duration = 280;
+    const startY = -48;
+    const startTime = performance.now();
+
+    await new Promise(resolve => {
+      const step = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / duration);
+        // Back ease out (subtle overshoot and snap)
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        const ease = 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        const curY = startY + (0 - startY) * ease;
+
+        this.drawCork(curY);
+
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          this.drawCork(0);
+          resolve();
+        }
+      };
+      requestAnimationFrame(step);
+    });
+
+    // Golden sparkles bursting left and right from the rim
+    this.spawnCapSparkles();
+  }
+
+  spawnCapSparkles() {
+    const pG = this.capParticlesGfx;
+    pG.clear();
+    const wRim = this.width * 0.55;
+    const particles = [];
+    for (let i = 0; i < 9; i++) {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+      const spd = 1.8 + Math.random() * 2.6;
+      particles.push({
+        x: (Math.random() - 0.5) * wRim * 0.8,
+        y: -4,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd,
+        life: 0,
+        maxLife: 28 + Math.random() * 16,
+        size: 2.2 + Math.random() * 2.8,
+        color: Math.random() > 0.3 ? 0xffd700 : 0xffffff
+      });
+    }
+
+    const animateParticles = () => {
+      pG.clear();
+      let active = false;
+      for (const p of particles) {
+        p.life++;
+        if (p.life < p.maxLife) {
+          active = true;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.09;
+          const alpha = 1 - (p.life / p.maxLife);
+          pG.lineStyle(1.2, p.color, alpha);
+          const s = p.size * (1 - p.life / p.maxLife * 0.4);
+          pG.moveTo(p.x - s, p.y); pG.lineTo(p.x + s, p.y);
+          pG.moveTo(p.x, p.y - s); pG.lineTo(p.x, p.y + s);
+        }
+      }
+      if (active) {
+        requestAnimationFrame(animateParticles);
+      } else {
+        pG.clear();
+      }
+    };
+    requestAnimationFrame(animateParticles);
   }
 
   drawLiquids(drainHeight = 0, fillHeight = 0, fillColor = null, tilt = 0) {
@@ -717,8 +903,8 @@ class FlaskView {
     const count = this.layers.length;
     if (count === 0) return;
 
-    // Do not draw resting surface wave while tilted or actively receiving liquid (prevents ghost intermediate line)
-    if (Math.abs(this.container.rotation) <= 0.05 && !this.isReceiving) {
+    // Do not draw resting surface wave while tilted, actively receiving liquid, or capped
+    if (Math.abs(this.container.rotation) <= 0.05 && !this.isReceiving && !this.isCapped) {
       const topColor = PALETTE[this.topColor()];
       const w = this.width;
       const h = this.height;
