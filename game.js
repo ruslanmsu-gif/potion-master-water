@@ -507,11 +507,6 @@ class FlaskView {
     gB.drawEllipse(0, 2, wRim - 4, 5);
     gB.endFill();
 
-    // Thick base refraction
-    gB.beginFill(0x80c8ff, 0.22);
-    gB.drawEllipse(0, h - 14, w * 0.38, 9);
-    gB.endFill();
-
     // 3. Glass Highlights & Open Outer Contour
     // Smooth flared contour: left rim -> flared collar -> vertical wall -> bottom semicircle -> vertical wall -> flared collar -> right rim
     gH.lineStyle(2, 0xd0e8ff, 0.55);
@@ -531,19 +526,15 @@ class FlaskView {
     this.drawFrontRim(gH, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
     this.drawFrontRim(gH, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
 
-    // Thick bottom reflection
-    gH.lineStyle(3, 0xffffff, 0.45);
-    gH.drawEllipse(0, h - 14, w * 0.32, 6);
-
-    // Left Specular Highlight Stripe
+    // Left Specular Highlight Stripe (cleanly stops before the bottom semicircle curvature)
     gH.lineStyle(3.5, 0xffffff, 0.85);
     gH.moveTo(-w * 0.36, flareY + 2);
-    gH.lineTo(-w * 0.36, h - 28);
+    gH.lineTo(-w * 0.36, bottomArcY - 2);
 
-    // Right subtle reflection
+    // Right subtle reflection (cleanly stops before the bottom semicircle curvature)
     gH.lineStyle(1.5, 0xffffff, 0.35);
     gH.moveTo(w * 0.36, flareY + 4);
-    gH.lineTo(w * 0.36, h - 35);
+    gH.lineTo(w * 0.36, bottomArcY - 5);
 
     this.drawStar(gH, -w * 0.36, flareY + 4, 4, 0xffffff);
   }
@@ -830,10 +821,19 @@ class FlaskView {
     for (let i = 0; i < count; i++) {
       const colorId = this.layers[i];
       if (!curChunk || curChunk.colorId !== colorId) {
-        curChunk = { colorId: colorId, startIndex: i, layerCount: 1 };
+        curChunk = { colorId: colorId, startIndex: i, layerCount: 1, extraH: 0 };
         chunks.push(curChunk);
       } else {
         curChunk.layerCount++;
+      }
+    }
+
+    // If receiving incoming liquid, merge into top chunk if same color, or add as new chunk
+    if (fillHeight > 0 && fillColor) {
+      if (chunks.length > 0 && chunks[chunks.length - 1].colorId === fillColor.id) {
+        chunks[chunks.length - 1].extraH = (chunks[chunks.length - 1].extraH || 0) + fillHeight;
+      } else {
+        chunks.push({ colorId: fillColor.id, startIndex: count, layerCount: 0, extraH: fillHeight });
       }
     }
 
@@ -848,7 +848,7 @@ class FlaskView {
     const chunkHeights = [];
     let totalNominalH = 0;
     for (let c = 0; c < chunks.length; c++) {
-      let cH = chunks[c].layerCount * layerH;
+      let cH = chunks[c].layerCount * layerH + (chunks[c].extraH || 0);
       if (c === chunks.length - 1 && drainHeight > 0) {
         cH = Math.max(0, cH - drainHeight);
       }
@@ -958,27 +958,6 @@ class FlaskView {
         g.lineTo(xR, yTR);
       }
     }
-
-    // --- 6. Dynamic filling layer inside target flask (always upright, tilt === 0) ---
-    if (fillHeight > 0 && fillColor) {
-      const isFillingEmptyFlask = (count === 0);
-      const topY = bottomY - (count * layerH) - fillHeight;
-      // Overlap slightly into existing liquid to guarantee seamless monolithic connection
-      const botY = isFillingEmptyFlask ? yBottomClamp : (bottomY - count * layerH + 2);
-
-      g.beginFill(fillColor.inner, 0.95);
-      g.drawRect(-w / 2 - 10, topY, w + 20, botY - topY);
-      g.endFill();
-
-      g.beginFill(fillColor.hex, 0.85);
-      g.drawRect(-w * 0.38, topY, w * 0.76, botY - topY);
-      g.endFill();
-
-      // Matching highlight sheen
-      g.beginFill(fillColor.glow, 0.35);
-      g.drawRect(-w * 0.34, topY, w * 0.18, botY - topY);
-      g.endFill();
-    }
   }
 
   updateVFX(time) {
@@ -995,7 +974,7 @@ class FlaskView {
       const topColor = PALETTE[this.topColor()];
       const w = this.width;
       const h = this.height;
-      const layerH = (h - 24) / FLASK_CAP;
+      const layerH = (h - 26) / FLASK_CAP;
       const surfaceY = (h - 8) - count * layerH;
 
       // Animated gentle wave at the top resting surface
