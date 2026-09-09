@@ -1,62 +1,71 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Potion Master: Wizard Sort</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Potion Master: Wizard Sort</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=MedievalSharp&display=swap" rel="stylesheet">
+  <!-- Pixi.js High-Performance WebGL Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
 </head>
 <body>
-    <div id="app-container">
-        <!-- Шапка Академии Магии -->
-        <header>
-            <div class="header-info">
-                <span class="chapter-badge" id="chapter-label">Семестр 1: Основы зельеварения</span>
-                <h1 class="level-title" id="level-title">Урок 1</h1>
-            </div>
-            <div class="header-actions">
-                <button class="icon-btn" id="sound-btn" title="Звук">🔊</button>
-            </div>
-        </header>
+  <div id="game-wrapper">
+    <header id="game-header">
+      <div class="header-left">
+        <span class="house-badge" id="house-badge">🦁 Gryffindor</span>
+      </div>
+      <div class="header-center">
+        <h1 id="level-title">LEVEL 1</h1>
+        <p id="level-sub">Novice Alchemist (v21)</p>
+      </div>
+      <div class="header-right">
+        <button id="btn-sound" class="icon-btn" title="Звук">🔊</button>
+      </div>
+    </header>
 
-        <!-- Игровая сцена (Canvas) -->
-        <div id="canvas-wrapper">
-            <canvas id="game-canvas"></canvas>
+    <main id="canvas-container">
+      <!-- WebGL Canvas rendered by Pixi.js -->
+    </main>
+
+    <footer id="game-footer">
+      <button id="btn-restart" class="action-btn">
+        <span class="btn-icon">↺</span>
+        <span class="btn-text">Заново</span>
+      </button>
+      <button id="btn-undo" class="action-btn">
+        <span class="btn-icon">⤺</span>
+        <span class="btn-text">Назад</span>
+      </button>
+      <button id="btn-grimoire" class="action-btn grimoire-btn">
+        <span class="btn-icon">📖</span>
+        <span class="btn-text">Гримуар</span>
+      </button>
+    </footer>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="win-stars">✨ 🌟 ✨</div>
+        <h2 id="win-title">ЗЕЛЬЕ СВАРЕНО!</h2>
+        <p id="win-desc">Вы успешно очистили магический эликсир и открыли рецепт в Гримуаре.</p>
+        <div id="potion-card" class="potion-card">
+          <div class="potion-preview" id="potion-preview"></div>
+          <div class="potion-info">
+            <span class="potion-name" id="potion-name">Эликсир Огня</span>
+            <span class="potion-rarity">Редкий артефакт</span>
+          </div>
         </div>
-
-        <!-- Нижняя панель заклинаний (Undo, Restart, +Flask) -->
-        <footer>
-            <button class="tool-btn" id="undo-btn" title="Отмена хода">
-                <div class="tool-icon-circle">↺</div>
-                <span>Отмена</span>
-            </button>
-            <button class="tool-btn" id="restart-btn" title="Начать заново">
-                <div class="tool-icon-circle">⟳</div>
-                <span>Сброс</span>
-            </button>
-            <button class="tool-btn" id="add-flask-btn" title="Добавить пустую колбу">
-                <div class="tool-icon-circle">🧪+</div>
-                <span>+ Колба</span>
-            </button>
-        </footer>
-
-        <!-- Модальное окно завершения урока (Победа) -->
-        <div class="modal-overlay" id="victory-modal">
-            <div class="parchment-card">
-                <div class="victory-stars">★ ★ ★</div>
-                <h2 class="modal-title">Зелье Сварено!</h2>
-                <p class="modal-desc" id="victory-desc">Идеальная чистота эссенции. Профессор зельеварения доволен вашей работой.</p>
-                <button class="primary-btn" id="next-level-btn">Следующий урок ➔</button>
-            </div>
-        </div>
+        <button id="btn-next-level" class="primary-btn">СЛЕДУЮЩИЙ УРОВЕНЬ →</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Скрипты игры -->
-    <script src="audio.js"></script>
-    <script src="levels.js"></script>
-    <script src="game.js"></script>
+  <script src="levels.js?v=21"></script>
+  <script src="audio.js?v=21"></script>
+  <script src="game.js?v=21"></script>
 </body>
 </html>
+
