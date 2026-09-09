@@ -344,6 +344,7 @@ class FlaskView {
     this.liquidGfx = new PIXI.Graphics();
     this.waveGfx = new PIXI.Graphics();
     this.sparklesGfx = new PIXI.Graphics();
+    this.backRimGfx = new PIXI.Graphics();
     this.glassHighlights = new PIXI.Graphics();
 
     this.liquidContainer = new PIXI.Container();
@@ -358,6 +359,7 @@ class FlaskView {
     this.container.addChild(this.glassBody);
     this.container.addChild(this.maskGfx);
     this.container.addChild(this.liquidContainer);
+    this.container.addChild(this.backRimGfx);
     this.container.addChild(this.capGfx);
     this.container.addChild(this.glassHighlights);
     this.container.addChild(this.capParticlesGfx);
@@ -460,9 +462,11 @@ class FlaskView {
   drawGlass() {
     const gB = this.glassBody;
     const gH = this.glassHighlights;
+    const gBack = this.backRimGfx;
     const m = this.maskGfx;
     gB.clear();
     gH.clear();
+    gBack.clear();
     m.clear();
 
     const w = this.width;
@@ -517,11 +521,14 @@ class FlaskView {
     gH.lineTo(w / 2, flareY);
     gH.quadraticCurveTo(w / 2, 6, wRim, 2);
 
-    // Gold mouth rim crowning the flared vessel
-    gH.lineStyle(4, 0xffd700, 0.95);
-    gH.drawEllipse(0, 2, wRim, 6);
-    gH.lineStyle(1.5, 0xffffff, 0.9);
-    gH.drawEllipse(0, 0, wRim - 4, 4.5);
+    // Gold mouth rim crowning the flared vessel (split into back and front arcs for 3D occlusion)
+    // 1. Back golden rim arc (in backRimGfx, placed behind cork stopper)
+    this.drawBackRim(gBack, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
+    this.drawBackRim(gBack, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
+
+    // 2. Front golden rim arc (in glassHighlights, placed in front of cork stopper)
+    this.drawFrontRim(gH, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
+    this.drawFrontRim(gH, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
 
     // Thick bottom reflection
     gH.lineStyle(3, 0xffffff, 0.45);
@@ -538,6 +545,26 @@ class FlaskView {
     gH.lineTo(w * 0.36, h - 35);
 
     this.drawStar(gH, -w * 0.36, flareY + 4, 4, 0xffffff);
+  }
+
+  drawBackRim(g, cx, cy, rx, ry, strokeWidth, strokeColor, strokeAlpha) {
+    g.lineStyle(strokeWidth, strokeColor, strokeAlpha);
+    g.moveTo(cx - rx, cy);
+    const steps = 24;
+    for (let i = 1; i <= steps; i++) {
+      const angle = Math.PI + (i / steps) * Math.PI;
+      g.lineTo(cx + rx * Math.cos(angle), cy + ry * Math.sin(angle));
+    }
+  }
+
+  drawFrontRim(g, cx, cy, rx, ry, strokeWidth, strokeColor, strokeAlpha) {
+    g.lineStyle(strokeWidth, strokeColor, strokeAlpha);
+    g.moveTo(cx + rx, cy);
+    const steps = 24;
+    for (let i = 1; i <= steps; i++) {
+      const angle = (i / steps) * Math.PI;
+      g.lineTo(cx + rx * Math.cos(angle), cy + ry * Math.sin(angle));
+    }
   }
 
   drawFrontRimOverlay(gfx) {
@@ -566,77 +593,76 @@ class FlaskView {
 
     const w = this.width;
     const cy = offsetY;
+    const wRim = w * 0.55;
 
-    // Authentic tapered wooden cork stopper sitting snugly inside the glass neck
-    const topW = w * 0.40;   // Top width at protruding head
-    const neckW = w * 0.38;  // Width right at rim entrance
-    const botW = w * 0.33;   // Bottom width deep inside neck
+    // Dimensions matching the inner neck contour with zero gaps:
+    const topCapW = wRim - 2.0;   // Cork head (~39.8px)
+    const mouthW = wRim - 3.5;    // Enters mouth opening (~38.3px)
+    const throatW = w / 2 - 2.8;  // Cylindrical throat (~35.2px)
 
-    const yTop = cy - 6;     // Protrudes slightly above rim
-    const yRim = cy + 2;     // Level of flask mouth rim
-    const yBot = cy + 22;    // Deep inside neck
+    const yTop = cy - 7;          // Top head (7px above rim)
+    const yRim = cy + 2;          // Rim level
+    const yCollar = cy + 18;      // Collar transition
+    const yBot = cy + 25;         // Deep inside liquid
 
-    // 1. Shadow underneath the bottom of the cork inside liquid
+    // 1. Bottom shadow inside liquid
     g.lineStyle(0);
-    g.beginFill(0x1a0f05, 0.45);
-    g.drawEllipse(0, yBot, botW, 3.5);
+    g.beginFill(0x1a0f05, 0.5);
+    g.drawEllipse(0, yBot, throatW, 3.5);
     g.endFill();
 
-    // 2. Main cork body (tapered trapezoid from top to bottom)
-    g.beginFill(0x996633);
-    g.drawPolygon([
-      -topW, yTop,
-       topW, yTop,
-       neckW, yRim,
-       botW, yBot,
-      -botW, yBot,
-      -neckW, yRim
-    ]);
+    // 2. Main cork body (tapered to follow inner glass wall smoothly)
+    g.beginFill(0x9e6a38);
+    g.moveTo(-topCapW, yTop);
+    g.lineTo(-mouthW, yRim);
+    g.quadraticCurveTo(-throatW, cy + 8, -throatW, yCollar);
+    g.lineTo(-throatW, yBot);
+    g.arc(0, yBot, throatW, Math.PI, 0, true);
+    g.lineTo(throatW, yCollar);
+    g.quadraticCurveTo(throatW, cy + 8, mouthW, yRim);
+    g.lineTo(topCapW, yTop);
+    g.closePath();
     g.endFill();
 
-    // Bottom rounded contour of cork
-    g.beginFill(0x7a4d22);
-    g.drawEllipse(0, yBot, botW, 3.5);
+    // Cylindrical shadow on left
+    g.beginFill(0x6e421a, 0.35);
+    g.moveTo(-topCapW, yTop);
+    g.lineTo(-mouthW, yRim);
+    g.quadraticCurveTo(-throatW, cy + 8, -throatW, yBot);
+    g.arc(0, yBot, throatW, Math.PI, Math.PI * 0.7, true);
+    g.lineTo(-throatW * 0.35, cy + 8);
+    g.lineTo(-topCapW * 0.4, yTop);
+    g.closePath();
     g.endFill();
 
-    // Left side depth shading
-    g.beginFill(0x663d18, 0.35);
-    g.drawPolygon([
-      -topW, yTop,
-      -topW * 0.5, yTop,
-      -botW * 0.5, yBot,
-      -botW, yBot
-    ]);
+    // Subtle right edge highlight
+    g.beginFill(0xcb9960, 0.25);
+    g.moveTo(topCapW * 0.6, yTop);
+    g.lineTo(topCapW, yTop);
+    g.lineTo(mouthW, yRim);
+    g.quadraticCurveTo(throatW, cy + 8, throatW, yBot);
+    g.lineTo(throatW * 0.65, yBot);
+    g.closePath();
     g.endFill();
 
-    // Right side subtle light reflection
-    g.beginFill(0xc28d53, 0.25);
-    g.drawPolygon([
-      topW * 0.6, yTop,
-      topW, yTop,
-      botW, yBot,
-      botW * 0.6, yBot
-    ]);
-    g.endFill();
+    // Natural cork porous flecks / grain
+    g.lineStyle(1.4, 0x5a3212, 0.45);
+    g.moveTo(-mouthW * 0.45, yRim + 3); g.lineTo(-mouthW * 0.1, yRim + 3);
+    g.moveTo(mouthW * 0.15, yRim + 5); g.lineTo(mouthW * 0.55, yRim + 5);
+    g.moveTo(-throatW * 0.5, yCollar - 4); g.lineTo(-throatW * 0.15, yCollar - 4);
+    g.moveTo(throatW * 0.1, yCollar + 1); g.lineTo(throatW * 0.45, yCollar + 1);
+    g.moveTo(-throatW * 0.25, yBot - 3); g.lineTo(throatW * 0.2, yBot - 3);
 
-    // 3. Realistic horizontal cork porous grain flecks
-    g.lineStyle(1.2, 0x5a3414, 0.4);
-    g.moveTo(-topW * 0.4, yTop + 3); g.lineTo(-topW * 0.1, yTop + 3);
-    g.moveTo(topW * 0.1, yRim + 3); g.lineTo(topW * 0.45, yRim + 3);
-    g.moveTo(-neckW * 0.5, yRim + 8); g.lineTo(-neckW * 0.2, yRim + 8);
-    g.moveTo(-botW * 0.2, yRim + 13); g.lineTo(botW * 0.25, yRim + 13);
-    g.moveTo(botW * 0.1, yBot - 3); g.lineTo(botW * 0.35, yBot - 3);
-
-    // 4. Flat beveled top of cork
-    g.lineStyle(1, 0xb8854c, 0.9);
+    // 3. Top face of cork
+    g.lineStyle(1.2, 0xba884e, 0.95);
     g.beginFill(0xab7742);
-    g.drawEllipse(0, yTop, topW, 3.8);
+    g.drawEllipse(0, yTop, topCapW, 4.2);
     g.endFill();
 
-    // Top face highlight
+    // Top face light sheen
     g.lineStyle(0);
-    g.beginFill(0xc9945b, 0.5);
-    g.drawEllipse(0, yTop - 0.5, topW * 0.75, 2.4);
+    g.beginFill(0xd29d63, 0.45);
+    g.drawEllipse(0, yTop - 0.5, topCapW * 0.72, 2.6);
     g.endFill();
   }
 
