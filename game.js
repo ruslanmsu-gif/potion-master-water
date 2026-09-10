@@ -77,7 +77,15 @@ class GameEngine {
     this.isBusy = false;
     this.undoStack = [];
 
-    document.getElementById("level-title").textContent = `LEVEL ${levelNum}`;
+    const preset = (typeof PRESET_LEVELS !== 'undefined' && levelNum <= PRESET_LEVELS.length) ? PRESET_LEVELS[levelNum - 1] : null;
+    this.currentRecipe = (preset && preset.isRecipeLevel) ? preset.recipe : null;
+
+    const levelSub = document.getElementById("level-sub");
+    if (this.currentRecipe && levelSub) {
+      levelSub.innerHTML = `📜 РЕЦЕПТ: 2🔴 + 2🔵 ➔ <b>${this.currentRecipe.potionName}</b>`;
+    } else if (levelSub) {
+      levelSub.textContent = `Novice Alchemist (v25)`;
+    }
 
     this.flasksLayer.removeChildren();
     this.flasks = [];
@@ -85,6 +93,9 @@ class GameEngine {
     const levelData = this.generateLevelData(levelNum);
     for (let i = 0; i < levelData.length; i++) {
       const flask = new FlaskView(this, i, levelData[i]);
+      if (this.currentRecipe && i === 0) {
+        flask.isMasterVessel = true;
+      }
       this.flasks.push(flask);
       this.flasksLayer.addChild(flask.container);
     }
@@ -250,8 +261,16 @@ class GameEngine {
 
     await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
 
-    // If target flask is fully solved with 4 same-color layers, seal it with magical cork
-    if (to.isCompletedFull() && !to.isCapped) {
+    // If target is master vessel and full: check if recipe completed!
+    if (to.isMasterVessel && to.layers.length === FLASK_CAP && !to.isCapped) {
+      const rubyCount = to.layers.filter(c => c === 0).length;
+      const sapphireCount = to.layers.filter(c => c === 2).length;
+      if (rubyCount === 2 && sapphireCount === 2) {
+        await to.synthesizePotion();
+      } else {
+        await to.capFlask();
+      }
+    } else if (to.isCompletedFull() && !to.isCapped) {
       await to.capFlask();
     }
 
@@ -453,6 +472,7 @@ class FlaskView {
     if (this.isCapped || target.isCapped) return false;
     if (this.layers.length === 0) return false;
     if (target.layers.length >= FLASK_CAP) return false;
+    if (target.isMasterVessel) return true; // Master Vessel accepts any ingredient!
     if (target.layers.length === 0) return true;
     return this.topColor() === target.topColor();
   }
@@ -464,6 +484,7 @@ class FlaskView {
   }
 
   isSolved() {
+    if (this.isMasterVessel) return this.isCapped;
     if (this.layers.length === 0) return true;
     if (this.layers.length < FLASK_CAP) return false;
     const first = this.layers[0];
@@ -559,6 +580,15 @@ class FlaskView {
     gH.lineTo(w * 0.36, bottomArcY - 5);
 
     this.drawStar(gH, -w * 0.36, flareY + 4, 4, 0xffffff);
+
+    if (this.isMasterVessel) {
+      // Golden Crown Crest & Ruby Gem on Master Crucible Neck
+      gH.lineStyle(3, 0xffd700, 0.95);
+      gH.drawCircle(0, flareY + 2, wRim * 0.42);
+      gH.beginFill(0xff1744, 0.95);
+      gH.drawCircle(0, flareY + 2, 4.5);
+      gH.endFill();
+    }
   }
 
   drawBackRim(g, cx, cy, rx, ry, strokeWidth, strokeColor, strokeAlpha) {
@@ -710,6 +740,17 @@ class FlaskView {
     g.beginFill(0xd29d63, 0.45);
     g.drawEllipse(0, yTop - 0.5, topCapW * 0.72, 2.4);
     g.endFill();
+  }
+
+  async synthesizePotion() {
+    // 1. Magical synthesis reaction: color morph into radiant Amethyst/Magenta Master Potion
+    this.layers = [4, 4, 4, 4];
+    this.drawLiquids();
+    this.spawnCapSparkles();
+    if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {
+      window.soundEngine.playFlaskComplete();
+    }
+    await this.capFlask();
   }
 
   uncapFlask() {

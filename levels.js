@@ -1,4 +1,4 @@
-﻿// Палитра драгоценных магических зелий (Глубокие тона, комфортные для глаз)
+// Палитра драгоценных магических зелий (Глубокие тона, комфортные для глаз)
 const POTION_PALETTE = {
     ruby: {
         id: 'ruby',
@@ -121,27 +121,29 @@ const PRESET_LEVELS = [
             []
         ]
     },
-    // Уровень 5: Легкий релакс (2 пустые колбы)
+    // Уровень 5: БОСС-УРОВЕНЬ: Ритуал Заварки «Пламенного Искровита»
     {
-        title: 'Урок 5: Дыхание алхимика',
+        title: 'Урок 5: Ритуал Заварки «Пламенного Искровита»',
         chapter: 'Семестр 1: Основы зельеварения',
+        isRecipeLevel: true,
+        recipe: {
+            potionName: 'Пламенный Искровит',
+            target: { ruby: 2, sapphire: 2 } // 2 Рубина + 2 Сапфира в Главный Сосуд #0
+        },
         flasks: [
-            ['sapphire', 'ruby', 'emerald', 'emerald'],
-            ['ruby', 'emerald', 'ruby', 'sapphire'],
-            ['sapphire', 'ruby', 'emerald', 'sapphire'],
-            [],
+            [], // Flask #0: Главный Алхимический Сосуд (Магическая Реторта)
+            ['ruby', 'sapphire', 'ruby', 'sapphire'],
+            ['sapphire', 'ruby', 'sapphire', 'ruby'],
             []
         ]
     },
-    // Уровень 6: Ввод 4-го цвета (Amber)
+    // Уровень 6: Релакс после победы (Легкая разгрузка)
     {
-        title: 'Урок 6: Пламя феникса',
+        title: 'Урок 6: Передышка Ученика',
         chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['amber', 'ruby', 'sapphire', 'emerald'],
-            ['emerald', 'amber', 'ruby', 'sapphire'],
-            ['sapphire', 'emerald', 'amber', 'ruby'],
-            ['ruby', 'sapphire', 'emerald', 'amber'],
+            ['ruby', 'emerald', 'ruby', 'emerald'],
+            ['emerald', 'ruby', 'emerald', 'ruby'],
             [],
             []
         ]
