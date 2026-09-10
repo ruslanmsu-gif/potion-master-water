@@ -259,11 +259,32 @@ class GameEngine {
     this.checkWinCondition();
   }
 
-  checkWinCondition() {
+  async checkWinCondition() {
     const won = this.flasks.every(f => f.isSolved());
-    if (won) {
-      this.showWinModal();
+    if (!won) return;
+
+    this.isBusy = true;
+
+    // 1. Initial short pause after last cork drop
+    await new Promise(r => setTimeout(r, 220));
+
+    // 2. Cascading wave bounce for all non-empty (solved) flasks
+    const solvedFlasks = this.flasks.filter(f => f.layers.length > 0);
+    for (let i = 0; i < solvedFlasks.length; i++) {
+      const flask = solvedFlasks[i];
+      flask.bounceTriumph(); // Trigger bounce + sparkles + chime
+      await new Promise(r => setTimeout(r, 110)); // Stagger wave by 110ms
     }
+
+    // 3. Admiration pause: allow player to view all completed, glowing flasks
+    await new Promise(r => setTimeout(r, 950));
+
+    // 4. Play grand victory sound & show modal
+    if (window.soundEngine && typeof window.soundEngine.playLevelWin === 'function') {
+      window.soundEngine.playLevelWin();
+    }
+    this.showWinModal();
+    this.isBusy = false;
   }
 
   showWinModal() {
@@ -790,6 +811,40 @@ class FlaskView {
       }
     };
     requestAnimationFrame(animateParticles);
+  }
+
+  async bounceTriumph() {
+    if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {
+      window.soundEngine.playFlaskComplete();
+    }
+
+    this.spawnCapSparkles();
+
+    const duration = 380;
+    const startY = this.container.y;
+    const startTime = performance.now();
+
+    await new Promise(resolve => {
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / duration);
+
+        const bounceY = Math.sin(t * Math.PI) * -16;
+        const scaleS = 1 + Math.sin(t * Math.PI) * 0.10;
+
+        this.container.y = startY + bounceY;
+        this.container.scale.set(scaleS, scaleS);
+
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          this.container.y = startY;
+          this.container.scale.set(1, 1);
+          resolve();
+        }
+      };
+      requestAnimationFrame(animate);
+    });
   }
 
   drawLiquids(drainHeight = 0, fillHeight = 0, fillColor = null, tilt = 0) {
