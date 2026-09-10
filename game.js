@@ -77,6 +77,11 @@ class GameEngine {
     this.isBusy = false;
     this.undoStack = [];
 
+    const levelTitle = document.getElementById("level-title");
+    if (levelTitle) {
+      levelTitle.textContent = `LEVEL ${levelNum}`;
+    }
+
     const preset = (typeof PRESET_LEVELS !== 'undefined' && levelNum <= PRESET_LEVELS.length) ? PRESET_LEVELS[levelNum - 1] : null;
     this.currentRecipe = (preset && preset.isRecipeLevel) ? preset.recipe : null;
 
@@ -84,7 +89,7 @@ class GameEngine {
     if (this.currentRecipe && levelSub) {
       levelSub.innerHTML = `📜 РЕЦЕПТ: 2🔴 + 2🔵 ➔ <b>${this.currentRecipe.potionName}</b>`;
     } else if (levelSub) {
-      levelSub.textContent = `Novice Alchemist (v25)`;
+      levelSub.textContent = `Novice Alchemist (v27)`;
     }
 
     this.flasksLayer.removeChildren();
