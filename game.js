@@ -87,7 +87,7 @@ class GameEngine {
 
     const levelSub = document.getElementById("level-sub");
     if (levelSub) {
-      levelSub.textContent = `Novice Alchemist (v29)`;
+      levelSub.textContent = `Novice Alchemist (v30)`;
     }
 
     // Floating Parchment Recipe HUD Banner
@@ -185,23 +185,23 @@ class GameEngine {
 
     if (this.currentRecipe) {
       // 🏰 Recipe Boss Level Layout: Central Master Crucible at top, ingredient flasks in bottom row
-      const masterW = Math.min(84, w * 0.24);
-      const masterH = masterW * 2.95;
+      const masterW = Math.min(78, w * 0.22);
+      const masterH = masterW * 2.85;
 
       const sideCount = total - 1;
-      const sideW = Math.min(66, (w - 40) / sideCount - 12);
+      const sideW = Math.min(64, (w - 40) / sideCount - 12);
       const sideH = sideW * 2.75;
 
-      const startY = Math.max(78, h * 0.16);
+      const startY = Math.max(30, h * 0.06);
 
       // Position Master Crucible (Flask 0) in top center
       this.flasks[0].setSize(masterW, masterH);
       this.flasks[0].setBasePosition(w / 2, startY);
 
-      // Position Side Flasks in bottom row
+      // Position Side Flasks in bottom row with clear vertical gap
       const spacingX = Math.min(102, (w - 20) / sideCount);
       const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
-      const sideY = startY + masterH * 0.65 + 48;
+      const sideY = startY + masterH + 32;
 
       for (let i = 1; i < total; i++) {
         const targetX = sideStartX + (i - 1) * spacingX;
