@@ -86,10 +86,23 @@ class GameEngine {
     this.currentRecipe = (preset && preset.isRecipeLevel) ? preset.recipe : null;
 
     const levelSub = document.getElementById("level-sub");
-    if (this.currentRecipe && levelSub) {
-      levelSub.innerHTML = `📜 РЕЦЕПТ: 2🔴 + 2🔵 ➔ <b>${this.currentRecipe.potionName}</b>`;
-    } else if (levelSub) {
-      levelSub.textContent = `Novice Alchemist (v28)`;
+    if (levelSub) {
+      levelSub.textContent = `Novice Alchemist (v29)`;
+    }
+
+    // Floating Parchment Recipe HUD Banner
+    let recipeBanner = document.getElementById("recipe-banner");
+    if (!recipeBanner) {
+      recipeBanner = document.createElement("div");
+      recipeBanner.id = "recipe-banner";
+      this.container.appendChild(recipeBanner);
+    }
+
+    if (this.currentRecipe) {
+      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Сварить <i>${this.currentRecipe.potionName}</i> (2🔴 + 2🔵)`;
+      recipeBanner.classList.remove("hidden");
+    } else {
+      recipeBanner.classList.add("hidden");
     }
 
     this.flasksLayer.removeChildren();
@@ -169,6 +182,34 @@ class GameEngine {
     const w = this.app.screen.width;
     const h = this.app.screen.height;
     const total = this.flasks.length;
+
+    if (this.currentRecipe) {
+      // 🏰 Recipe Boss Level Layout: Central Master Crucible at top, ingredient flasks in bottom row
+      const masterW = Math.min(84, w * 0.24);
+      const masterH = masterW * 2.95;
+
+      const sideCount = total - 1;
+      const sideW = Math.min(66, (w - 40) / sideCount - 12);
+      const sideH = sideW * 2.75;
+
+      const startY = Math.max(78, h * 0.16);
+
+      // Position Master Crucible (Flask 0) in top center
+      this.flasks[0].setSize(masterW, masterH);
+      this.flasks[0].setBasePosition(w / 2, startY);
+
+      // Position Side Flasks in bottom row
+      const spacingX = Math.min(102, (w - 20) / sideCount);
+      const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
+      const sideY = startY + masterH * 0.65 + 48;
+
+      for (let i = 1; i < total; i++) {
+        const targetX = sideStartX + (i - 1) * spacingX;
+        this.flasks[i].setSize(sideW, sideH);
+        this.flasks[i].setBasePosition(targetX, sideY);
+      }
+      return;
+    }
 
     let cols = total;
     let rows = 1;
@@ -284,7 +325,14 @@ class GameEngine {
   }
 
   async checkWinCondition() {
-    const won = this.flasks.every(f => f.isSolved());
+    let won = false;
+    if (this.currentRecipe) {
+      // Recipe level win condition: Master Vessel (Flask 0) is synthesized and capped!
+      won = this.flasks[0].isCapped;
+    } else {
+      won = this.flasks.every(f => f.isSolved());
+    }
+
     if (!won) return;
 
     this.isBusy = true;

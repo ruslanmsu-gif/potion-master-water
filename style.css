@@ -82,6 +82,30 @@ body {
   gap: 6px;
 }
 
+/* Recipe HUD Banner */
+#recipe-banner {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(45, 32, 12, 0.94) 0%, rgba(20, 12, 5, 0.96) 100%);
+  border: 1.5px solid #ffd700;
+  box-shadow: 0 4px 18px rgba(255, 215, 0, 0.35), 0 0 10px rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 13px;
+  color: #fff3c4;
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  z-index: 15;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+#recipe-banner.hidden {
+  display: none;
+}
+
 .icon-btn {
   background: rgba(40, 30, 60, 0.6);
   border: 1px solid rgba(180, 150, 220, 0.25);
