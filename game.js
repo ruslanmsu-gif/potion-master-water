@@ -89,7 +89,7 @@ class GameEngine {
     if (this.currentRecipe && levelSub) {
       levelSub.innerHTML = `📜 РЕЦЕПТ: 2🔴 + 2🔵 ➔ <b>${this.currentRecipe.potionName}</b>`;
     } else if (levelSub) {
-      levelSub.textContent = `Novice Alchemist (v27)`;
+      levelSub.textContent = `Novice Alchemist (v28)`;
     }
 
     this.flasksLayer.removeChildren();
@@ -362,6 +362,16 @@ class GameEngine {
     document.getElementById("btn-next-level").addEventListener("click", () => {
       document.getElementById("win-modal").classList.add("hidden");
       this.loadLevel(this.currentLevel + 1);
+    });
+
+    // Developer Admin Quick-Skip controls
+    document.getElementById("btn-dev-next")?.addEventListener("click", () => {
+      this.loadLevel(this.currentLevel + 1);
+    });
+    document.getElementById("btn-dev-prev")?.addEventListener("click", () => {
+      if (this.currentLevel > 1) {
+        this.loadLevel(this.currentLevel - 1);
+      }
     });
   }
 }

@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Potion Master: Wizard Sort - Style & Layout
    ========================================================================== */
 
@@ -76,6 +76,12 @@ body {
   color: #a89bb8;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .icon-btn {
   background: rgba(40, 30, 60, 0.6);
   border: 1px solid rgba(180, 150, 220, 0.25);
@@ -93,6 +99,18 @@ body {
 .icon-btn:hover {
   background: rgba(60, 45, 90, 0.9);
   transform: scale(1.05);
+}
+
+.dev-btn {
+  background: rgba(220, 50, 50, 0.22) !important;
+  border: 1px solid rgba(255, 120, 120, 0.45) !important;
+  font-size: 13px !important;
+  width: 34px !important;
+  height: 34px !important;
+}
+.dev-btn:hover {
+  background: rgba(255, 60, 60, 0.6) !important;
+  transform: scale(1.08) !important;
 }
 
 /* Canvas Container */
