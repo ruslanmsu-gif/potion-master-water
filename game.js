@@ -596,7 +596,7 @@ class FlaskView {
     const yTop = cy - 5;          // Protrudes 5px above rim
     const yRim = cy + 2;          // Rim level
     const yCollar = cy + 12;      // Collar transition
-    const yBot = cy + 21;         // Tip enters potion to y=21 (~5.5px depth)
+    const yBot = cy + 27;         // Tip enters potion to y=27 (~11.5px depth into liquid)
     const yWater = 15.5;          // Rest fluid surface level
 
     const topColor = this.layers.length > 0 ? PALETTE[this.topColor()] : null;
@@ -648,14 +648,14 @@ class FlaskView {
       if (yBot > actualYWater) {
         const subH = yBot - actualYWater;
 
-        // Dark wet wood base overlay (darkens wood under liquid)
+        // Dark wet wood base overlay (makes submerged wood clearly distinct from liquid)
         g.lineStyle(0);
-        g.beginFill(0x3d200a, 0.48);
+        g.beginFill(0x2b1505, 0.58);
         g.drawRect(-throatW, actualYWater, throatW * 2, subH);
         g.endFill();
 
-        // Potion inner tint overlay (balanced translucency so wood texture stays visible)
-        g.beginFill(topColor.inner, 0.32);
+        // Potion inner tint overlay (tinted by liquid color)
+        g.beginFill(topColor.inner, 0.36);
         g.drawRect(-throatW, actualYWater, throatW * 2, subH);
         g.endFill();
 
@@ -664,8 +664,13 @@ class FlaskView {
         g.drawRect(-throatW, actualYWater, throatW * 2, subH);
         g.endFill();
 
-        // Subtle dark outline around submerged cork tip inside liquid
-        g.lineStyle(1.0, 0x1f0e04, 0.35);
+        // Submerged wood texture lines for clear physical presence under water
+        g.lineStyle(1.4, 0x180902, 0.55);
+        g.moveTo(-throatW * 0.4, actualYWater + 3); g.lineTo(-throatW * 0.1, actualYWater + 3);
+        g.moveTo(throatW * 0.1, actualYWater + 7); g.lineTo(throatW * 0.45, actualYWater + 7);
+
+        // Strong dark outline around submerged cork tip inside liquid
+        g.lineStyle(1.6, 0x120601, 0.70);
         g.moveTo(-throatW, actualYWater);
         g.lineTo(-throatW, yBot);
         g.lineTo(throatW, yBot);
