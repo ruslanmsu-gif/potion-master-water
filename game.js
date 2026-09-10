@@ -205,6 +205,7 @@ class GameEngine {
   }
 
   onFlaskClicked(flask) {
+    if (window.soundEngine) window.soundEngine.init();
     if (this.isBusy || flask.isCapped) return;
 
     if (!this.selectedFlask) {
@@ -595,7 +596,7 @@ class FlaskView {
     const yTop = cy - 5;          // Protrudes 5px above rim
     const yRim = cy + 2;          // Rim level
     const yCollar = cy + 12;      // Collar transition
-    const yBot = cy + 18.5;       // Tip enters potion to y=18.5
+    const yBot = cy + 21;         // Tip enters potion to y=21 (~5.5px depth)
     const yWater = 15.5;          // Rest fluid surface level
 
     const topColor = this.layers.length > 0 ? PALETTE[this.topColor()] : null;
@@ -606,7 +607,7 @@ class FlaskView {
     g.lineTo(-mouthW, yRim);
     g.quadraticCurveTo(-throatW, cy + 7, -throatW, yCollar);
     g.lineTo(-throatW, yBot);
-    g.arc(0, yBot, throatW, Math.PI, 0, true);
+    g.lineTo(throatW, yBot);
     g.lineTo(throatW, yCollar);
     g.quadraticCurveTo(throatW, cy + 7, mouthW, yRim);
     g.lineTo(topCapW, yTop);
@@ -618,7 +619,7 @@ class FlaskView {
     g.moveTo(-topCapW, yTop);
     g.lineTo(-mouthW, yRim);
     g.quadraticCurveTo(-throatW, cy + 7, -throatW, yBot);
-    g.arc(0, yBot, throatW, Math.PI, Math.PI * 0.7, true);
+    g.lineTo(0, yBot);
     g.lineTo(-throatW * 0.35, cy + 7);
     g.lineTo(-topCapW * 0.4, yTop);
     g.closePath();
@@ -641,49 +642,35 @@ class FlaskView {
     g.moveTo(-throatW * 0.45, yCollar - 2); g.lineTo(-throatW * 0.1, yCollar - 2);
     g.moveTo(throatW * 0.1, yCollar + 1); g.lineTo(throatW * 0.4, yCollar + 1);
 
-    // 2. Optical Submergence: The 3px tip inside potion is darkened and tinted by the potion color!
+    // 2. Optical Submergence: Submerged tip inside potion is dark wet wood tinted by potion color!
     if (yBot > yWater && topColor) {
-      const subH = yBot - yWater;
+      const actualYWater = Math.max(cy + 12, yWater);
+      if (yBot > actualYWater) {
+        const subH = yBot - actualYWater;
 
-      // Dark wet wood base for submerged portion
-      g.lineStyle(0);
-      g.beginFill(0x4a250e, 0.55);
-      g.moveTo(-throatW, yWater);
-      g.lineTo(-throatW, yBot);
-      g.arc(0, yBot, throatW, Math.PI, 0, true);
-      g.lineTo(throatW, yWater);
-      g.closePath();
-      g.endFill();
+        // Dark wet wood base overlay (darkens wood under liquid)
+        g.lineStyle(0);
+        g.beginFill(0x3d200a, 0.48);
+        g.drawRect(-throatW, actualYWater, throatW * 2, subH);
+        g.endFill();
 
-      // Deep saturated potion inner color tint
-      g.beginFill(topColor.inner, 0.68);
-      g.moveTo(-throatW, yWater);
-      g.lineTo(-throatW, yBot);
-      g.arc(0, yBot, throatW, Math.PI, 0, true);
-      g.lineTo(throatW, yWater);
-      g.closePath();
-      g.endFill();
+        // Potion inner tint overlay (balanced translucency so wood texture stays visible)
+        g.beginFill(topColor.inner, 0.32);
+        g.drawRect(-throatW, actualYWater, throatW * 2, subH);
+        g.endFill();
 
-      // Potion vibrant hex overlay tint
-      g.beginFill(topColor.hex, 0.40);
-      g.moveTo(-throatW, yWater);
-      g.lineTo(-throatW, yBot);
-      g.arc(0, yBot, throatW, Math.PI, 0, true);
-      g.lineTo(throatW, yWater);
-      g.closePath();
-      g.endFill();
+        // Potion bright hex overlay
+        g.beginFill(topColor.hex, 0.18);
+        g.drawRect(-throatW, actualYWater, throatW * 2, subH);
+        g.endFill();
 
-      // Glowing liquid meniscus on the wood at waterline
-      g.lineStyle(1.8, topColor.glow, 0.85);
-      g.drawEllipse(0, yWater, throatW + 0.5, 2.2);
-      g.lineStyle(1.0, 0xffffff, 0.7);
-      g.drawEllipse(0, yWater - 0.4, throatW * 0.85, 1.4);
-
-      // Deep refractive drop shadow beneath submerged tip
-      g.lineStyle(0);
-      g.beginFill(0x0a0515, 0.45);
-      g.drawEllipse(0, yBot, throatW * 0.88, 2.4);
-      g.endFill();
+        // Subtle dark outline around submerged cork tip inside liquid
+        g.lineStyle(1.0, 0x1f0e04, 0.35);
+        g.moveTo(-throatW, actualYWater);
+        g.lineTo(-throatW, yBot);
+        g.lineTo(throatW, yBot);
+        g.lineTo(throatW, actualYWater);
+      }
     }
 
     // 3. Top face of cork
@@ -710,11 +697,6 @@ class FlaskView {
   async capFlask() {
     if (this.isCapped) return;
     this.isCapped = true;
-
-    // Trigger ONLY the crisp wooden pop sound — NO harp/melody
-    if (window.soundEngine && typeof window.soundEngine.playCork === 'function') {
-      window.soundEngine.playCork();
-    }
 
     // Snappy drop animation into flask mouth (-38px down into neck 0px)
     const duration = 220;
@@ -746,6 +728,9 @@ class FlaskView {
           this.corkDisplacement = 2.5;
           this.drawLiquids();
           this.drawCork(0);
+          if (window.soundEngine && typeof window.soundEngine.playCork === 'function') {
+            window.soundEngine.playCork();
+          }
           resolve();
         }
       };
