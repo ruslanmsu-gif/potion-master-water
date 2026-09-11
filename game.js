@@ -185,12 +185,12 @@ class GameEngine {
 
     if (this.currentRecipe) {
       // 🏰 Recipe Boss Level Layout: Central Master Crucible at top, ingredient flasks in bottom row
-      const masterW = Math.min(78, w * 0.22);
-      const masterH = masterW * 2.85;
+      const masterW = Math.min(64, w * 0.18);
+      const masterH = masterW * 3.2;
 
       const sideCount = total - 1;
-      const sideW = Math.min(64, (w - 40) / sideCount - 12);
-      const sideH = sideW * 2.75;
+      const sideW = Math.min(52, (w - 40) / sideCount - 12);
+      const sideH = sideW * 3.2;
 
       const startY = Math.max(30, h * 0.06);
 
@@ -211,47 +211,32 @@ class GameEngine {
       return;
     }
 
-    let cols = total;
-    let rows = 1;
-    if (total > 4) {
-      cols = Math.ceil(total / 2);
-      rows = 2;
-    }
+    // --- Normal levels: always max 6 per row, guaranteed to fit any screen ---
+    const MAX_COLS = 6;
+    const GAP = 22;      // visible gap between flasks — comfortable breathing room
+    const RATIO = 3.4;   // height = width * RATIO (elegant slender flask)
+    const SIDE_PAD = 24; // total horizontal padding
 
-    let flaskWidth, flaskHeight, spacingX, spacingY, startX, startY;
+    // Flask width guaranteed to fit MAX_COLS on any device with proper gaps
+    const flaskWidth = Math.min(42, Math.floor((w - SIDE_PAD - (MAX_COLS - 1) * GAP) / MAX_COLS));
+    const flaskHeight = Math.round(flaskWidth * RATIO);
+    const spacingX = flaskWidth + GAP;
 
-    if (rows === 1) {
-      flaskWidth = Math.min(76, (w - 40) / cols - 16);
-      flaskHeight = flaskWidth * 2.85;
-      spacingX = Math.min(108, (w - 20) / cols);
-      spacingY = 0;
-      startX = (w - (cols - 1) * spacingX) / 2;
-      startY = (h - flaskHeight) / 2 + 10;
-    } else {
-      // 2-row layout adapted for mobile screen:
-      // Leave ~70px at top for tilting flask and header, ~25px gap between rows, ~20px before footer
-      const maxH = (h - 130) / 2;
-      flaskHeight = Math.min(175, Math.max(130, maxH));
-      flaskWidth = Math.min(64, flaskHeight / 2.75, (w - 40) / cols - 12);
-      flaskHeight = flaskWidth * 2.75;
+    // Grid layout
+    const rows = Math.ceil(total / MAX_COLS);
+    const spacingY = flaskHeight + 36;
 
-      spacingX = Math.min(94, (w - 20) / cols);
-      spacingY = flaskHeight + 42;
-
-      startX = (w - (cols - 1) * spacingX) / 2;
-      startY = Math.max(68, (h - (flaskHeight + spacingY)) / 2 + 15);
-    }
+    // Vertical centering
+    const totalGridH = rows * flaskHeight + (rows - 1) * 36;
+    const startY = Math.max(65, Math.round((h - totalGridH) / 2) + 10);
 
     for (let i = 0; i < total; i++) {
-      const col = rows === 1 ? i : i % cols;
-      const row = rows === 1 ? 0 : Math.floor(i / cols);
+      const row = Math.floor(i / MAX_COLS);
+      const col = i % MAX_COLS;
 
-      // If the bottom row has fewer flasks, center them horizontally
-      let rowStartX = startX;
-      if (rows === 2 && row === 1) {
-        const bottomCount = total - cols;
-        rowStartX = (w - (bottomCount - 1) * spacingX) / 2;
-      }
+      // Center each row (last row may have fewer flasks)
+      const rowCount = (row === rows - 1) ? (total - row * MAX_COLS) : MAX_COLS;
+      const rowStartX = Math.round((w - (rowCount - 1) * spacingX) / 2);
 
       const targetX = rowStartX + col * spacingX;
       const targetY = startY + row * spacingY;
