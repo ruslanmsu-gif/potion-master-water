@@ -1,4 +1,4 @@
-const GAME_VERSION = "v48";
+const GAME_VERSION = "v49";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -409,9 +409,9 @@ class GameEngine {
     if (!list) return;
     list.innerHTML = "";
 
-    // Exact Bezier curve node coordinates (Bottom-to-Top: Chapter 1 at y=1500, Chapter 10 at y=100)
+    // Exact Bezier curve node coordinates (Bottom-to-Top: Chapter 1 at y=1360, Chapter 10 at y=100)
     const nodeCoords = [
-      { chapter: 1,  x: 200, y: 1500, title: "Основы зельеварения" },
+      { chapter: 1,  x: 200, y: 1360, title: "Основы зельеварения" },
       { chapter: 2,  x: 300, y: 1340, title: "Заколдованный лес" },
       { chapter: 3,  x: 200, y: 1180, title: "Первые травы" },
       { chapter: 4,  x: 100, y: 1020, title: "Подземелье Снейпа" },
@@ -426,7 +426,7 @@ class GameEngine {
     // Ensure path SVG d attribute matches exact node coordinates
     const pathEl = document.getElementById("saga-path-line");
     if (pathEl) {
-      pathEl.setAttribute("d", "M 200,1500 C 260,1460 300,1400 300,1340 C 300,1280 260,1220 200,1180 C 140,1140 100,1080 100,1020 C 100,960 140,900 200,860 C 260,820 300,760 300,700 C 300,640 260,580 200,540 C 140,500 100,440 100,380 C 100,320 140,260 200,220 C 260,180 300,140 300,100");
+      pathEl.setAttribute("d", "M 200,1360 C 250,1360 280,1340 300,1340 C 300,1280 260,1220 200,1180 C 140,1140 100,1080 100,1020 C 100,960 140,900 200,860 C 260,820 300,760 300,700 C 300,640 260,580 200,540 C 140,500 100,440 100,380 C 100,320 140,260 200,220 C 260,180 300,140 300,100");
     }
 
     const currentChapter = Math.ceil(this.currentLevel / 50) || 1;
