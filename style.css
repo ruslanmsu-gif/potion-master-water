@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v49)
+   Potion Master: Wizard Sort - Style & Layout (v50)
    ========================================================================== */
 
 * {
@@ -169,7 +169,7 @@ body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   background: #0d0a17;
-  padding-bottom: 280px;
+  padding-bottom: 60px;
 }
 
 /* Hide Scrollbar for clean mobile view */
@@ -432,6 +432,7 @@ body {
    Bottom Navigation Dock
    ========================================================================== */
 #bottom-dock {
+  position: relative;
   height: 75px;
   width: 100%;
   display: flex;
