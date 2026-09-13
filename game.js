@@ -1,4 +1,4 @@
-const GAME_VERSION = "v39";
+const GAME_VERSION = "v40";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1051,11 +1051,11 @@ class FlaskView {
       g.endFill();
 
       // 2. Luminous core
-      const coreL = -w * 0.36;
-      const coreR = w * 0.36;
+      const coreL = -w * 0.34;
+      const coreR = w * 0.34;
       const coreBL = isBottomChunk ? yBottomClamp : (Y_bot - coreL * slope);
       const coreBR = isBottomChunk ? yBottomClamp : (Y_bot - coreR * slope);
-      
+
       const coreTopPoints = [];
       for (let p of topCurvePoints) {
         if (p.x >= coreL && p.x <= coreR) {
@@ -1073,42 +1073,47 @@ class FlaskView {
       g.drawPolygon(corePoly);
       g.endFill();
 
-      // 3. Highlight sheen
-      const hL = -w * 0.34;
-      const hR = -w * 0.16;
-      const hBL = isBottomChunk ? yBottomClamp : (Y_bot - hL * slope);
-      const hBR = isBottomChunk ? yBottomClamp : (Y_bot - hR * slope);
-      
-      const sheenTopPoints = [];
-      for (let p of topCurvePoints) {
-        if (p.x >= hL && p.x <= hR) {
-          sheenTopPoints.push(p.x, p.y);
-        }
-      }
-
-      const sheenPoly = [];
-      for (let i = 0; i < sheenTopPoints.length; i += 2) {
-        sheenPoly.push(sheenTopPoints[i], sheenTopPoints[i + 1]);
-      }
-      sheenPoly.push(hR, hBR, hL, hBL);
-
-      g.beginFill(color.glow, 0.35);
-      g.drawPolygon(sheenPoly);
-      g.endFill();
-
-      // 4. Subtle boundary line between DIFFERENT colors
+      // 3. Subtle boundary line between DIFFERENT colors
       if (c < chunks.length - 1) {
         g.lineStyle(1, color.glow, 0.25);
         g.moveTo(xL, Y_top - xL * slope);
         g.lineTo(xR, Y_top - xR * slope);
       }
 
-      // 5. Surface meniscus line on top-most fluid layer
+      // 4. Surface meniscus line on top-most fluid layer
       if (isTopChunk && isTilted) {
         g.lineStyle(2.5, 0xffffff, 0.75);
         g.moveTo(xL, Y_top - xL * slope);
         g.lineTo(xR, Y_top - xR * slope);
       }
+    }
+
+    // --- 6. UNIFIED SEAMLESS VERTICAL VELVET SHEEN OVERLAY (ONLY WHEN LIQUID IS PRESENT) ---
+    // Renders one clean, continuous, perfectly straight vertical highlight stripe from fluid bottom to wave top!
+    if (chunks.length > 0 && totalNominalH > 0) {
+      const topChunkPoints = [];
+      const waveTime = (this.engine ? (this.engine.time || performance.now() * 0.003) : 0);
+      const isRestingWave = (!isTilted && !this.isReceiving && !this.isCapped);
+
+      const hL = -w * 0.32;
+      const hR = -w * 0.18;
+      const step = 3;
+
+      for (let x = hL; x <= hR; x += step) {
+        const wave = isRestingWave ? Math.sin(waveTime * 3.5 + x * 0.18) * 1.8 : 0;
+        topChunkPoints.push(x, topSurfaceY - x * slope + wave);
+      }
+
+      const sheenPoly = [];
+      for (let i = 0; i < topChunkPoints.length; i += 2) {
+        sheenPoly.push(topChunkPoints[i], topChunkPoints[i + 1]);
+      }
+      // Bottom clamp into rounded glass base
+      sheenPoly.push(hR, yBottomClamp, hL, yBottomClamp);
+
+      g.beginFill(0xffffff, 0.18);
+      g.drawPolygon(sheenPoly);
+      g.endFill();
     }
   }
 
