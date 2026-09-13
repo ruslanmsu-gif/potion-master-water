@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Potion Master: Wizard Sort</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
-  <link rel="stylesheet" href="style.css?v=56">
+  <link rel="stylesheet" href="style.css?v=57">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=MedievalSharp&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         </div>
         <div class="header-center">
           <h1 class="app-title">POTION MASTER</h1>
-          <p class="app-sub">Wizard Sort (v56)</p>
+          <p class="app-sub">Wizard Sort (v57)</p>
         </div>
         <div class="header-right">
           <button id="btn-main-sound" class="icon-btn" title="Звук">🔊</button>
@@ -34,31 +34,71 @@
         </div>
       </header>
 
-      <!-- Scrollable Saga Map Canvas & Trail -->
-      <div id="saga-map-container">
-        <!-- Dynamic Layered Parallax Backgrounds -->
-        <div class="saga-bg-layer bg-top-auditorium"></div>
-        <div class="saga-bg-layer bg-mid-castle"></div>
-        <div class="saga-bg-layer bg-bot-forest"></div>
-
-        <!-- Floating Atmospheric Candle Overlay -->
-        <div class="floating-candles-layer">
-          <div class="candle candle-1">🕯️</div>
-          <div class="candle candle-2">🕯️</div>
-          <div class="candle candle-3">🕯️</div>
-          <div class="candle candle-4">🕯️</div>
-          <div class="candle candle-5">🕯️</div>
-          <div class="owl-perch">🦉</div>
+      <!-- Main Tabs Viewport for Smooth Slide Transitions -->
+      <div id="main-tabs-viewport">
+        <!-- 1. Statistics Tab View -->
+        <div id="stats-tab-container" class="tab-view-container tab-view-hidden-left">
+          <div class="tab-view-header">
+            <h2>📊 СТАТИСТИКА</h2>
+          </div>
+          <div class="stats-tabs">
+            <button class="stats-tab active" data-subtab="all-time">За всё время</button>
+            <button class="stats-tab" data-subtab="week">За неделю</button>
+            <button class="stats-tab" data-subtab="today">За сегодня</button>
+          </div>
+          <div class="stats-body" id="stats-body-content">
+            <div class="stat-card">
+              <span class="stat-value" id="stat-completed-levels">0</span>
+              <span class="stat-label">Уровней пройдено</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="stat-brewed-potions">0</span>
+              <span class="stat-label">Зелий сварено</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="stat-perfect-sorts">0</span>
+              <span class="stat-label">Идеальных сортировок</span>
+            </div>
+          </div>
         </div>
 
-        <!-- SVG Winding Path Line -->
-        <svg class="saga-path-svg" viewBox="0 0 400 1600" preserveAspectRatio="none">
-          <path id="saga-path-line" d="M 200,1440 C 260,1440 280,1400 300,1340 C 300,1280 260,1220 200,1180 C 140,1140 100,1080 100,1020 C 100,960 140,900 200,860 C 260,820 300,760 300,700 C 300,640 260,580 200,540 C 140,500 100,440 100,380 C 100,320 140,260 200,220 C 260,180 300,140 300,100" fill="none" stroke="rgba(255, 215, 0, 0.45)" stroke-width="8" stroke-dasharray="12 8" />
-        </svg>
+        <!-- 2. Scrollable Saga Map Canvas & Trail (Default Center View) -->
+        <div id="saga-map-container" class="tab-view-container tab-view-active">
+          <!-- Dynamic Layered Parallax Backgrounds -->
+          <div class="saga-bg-layer bg-top-auditorium"></div>
+          <div class="saga-bg-layer bg-mid-castle"></div>
+          <div class="saga-bg-layer bg-bot-forest"></div>
 
-        <!-- Saga Trail Nodes (Chapters 10 to 1, going Bottom-to-Top) -->
-        <div class="saga-nodes-list" id="saga-nodes-list">
-          <!-- Dynamically populated via JS, or fallback default HTML -->
+          <!-- Floating Atmospheric Candle Overlay -->
+          <div class="floating-candles-layer">
+            <div class="candle candle-1">🕯️</div>
+            <div class="candle candle-2">🕯️</div>
+            <div class="candle candle-3">🕯️</div>
+            <div class="candle candle-4">🕯️</div>
+            <div class="candle candle-5">🕯️</div>
+            <div class="owl-perch">🦉</div>
+          </div>
+
+          <!-- SVG Winding Path Line -->
+          <svg class="saga-path-svg" viewBox="0 0 400 1600" preserveAspectRatio="none">
+            <path id="saga-path-line" d="M 200,1440 C 260,1440 280,1400 300,1340 C 300,1280 260,1220 200,1180 C 140,1140 100,1080 100,1020 C 100,960 140,900 200,860 C 260,820 300,760 300,700 C 300,640 260,580 200,540 C 140,500 100,440 100,380 C 100,320 140,260 200,220 C 260,180 300,140 300,100" fill="none" stroke="rgba(255, 215, 0, 0.45)" stroke-width="8" stroke-dasharray="12 8" />
+          </svg>
+
+          <!-- Saga Trail Nodes (Chapters 10 to 1, going Bottom-to-Top) -->
+          <div class="saga-nodes-list" id="saga-nodes-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- 3. Collection Tab View -->
+        <div id="collection-tab-container" class="tab-view-container tab-view-hidden-right">
+          <div class="tab-view-header">
+            <h2>🧪 КОЛЛЕКЦИЯ ЗЕЛИЙ</h2>
+            <p class="collection-subtitle">Сваренные эликсиры и рецепты Гримуара</p>
+          </div>
+          <div class="collection-grid" id="collection-grid">
+            <!-- Filled dynamically via JS -->
+          </div>
         </div>
       </div>
 
@@ -115,7 +155,7 @@
         </div>
         <div class="header-center">
           <h1 id="level-title">LEVEL 1</h1>
-          <p id="level-sub">Novice Alchemist (v56)</p>
+          <p id="level-sub">Novice Alchemist (v57)</p>
         </div>
         <div class="header-right">
           <button id="btn-sound" class="icon-btn" title="Звук">🔊</button>

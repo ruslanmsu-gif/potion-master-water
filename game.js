@@ -1,4 +1,4 @@
-const GAME_VERSION = "v56";
+const GAME_VERSION = "v57";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -488,24 +488,52 @@ class GameEngine {
     const archEl = document.querySelector(".dock-border-svg");
     const straightBgEl = document.querySelector(".dock-straight-bg");
 
+    const mapContainer = document.getElementById("saga-map-container");
+    const collectionContainer = document.getElementById("collection-tab-container");
+    const statsContainer = document.getElementById("stats-tab-container");
+
     if (tabId === "map") {
       if (quickBtn) quickBtn.style.display = "flex";
       if (archEl) archEl.style.display = "block";
       if (straightBgEl) straightBgEl.classList.add("hidden-dock-bg");
-      this.closeModal("stats-modal");
-      this.closeModal("collection-modal");
-    } else if (tabId === "stats") {
-      if (quickBtn) quickBtn.style.display = "none";
-      if (archEl) archEl.style.display = "none";
-      if (straightBgEl) straightBgEl.classList.remove("hidden-dock-bg");
-      this.openModal("stats-modal");
-      this.closeModal("collection-modal");
+
+      if (mapContainer) {
+        mapContainer.className = "tab-view-container tab-view-active";
+      }
+      if (collectionContainer) {
+        collectionContainer.className = "tab-view-container tab-view-hidden-right";
+      }
+      if (statsContainer) {
+        statsContainer.className = "tab-view-container tab-view-hidden-left";
+      }
     } else if (tabId === "collection") {
       if (quickBtn) quickBtn.style.display = "none";
       if (archEl) archEl.style.display = "none";
       if (straightBgEl) straightBgEl.classList.remove("hidden-dock-bg");
-      this.openModal("collection-modal");
-      this.closeModal("stats-modal");
+
+      if (mapContainer) {
+        mapContainer.className = "tab-view-container tab-view-hidden-left";
+      }
+      if (collectionContainer) {
+        collectionContainer.className = "tab-view-container tab-view-active";
+      }
+      if (statsContainer) {
+        statsContainer.className = "tab-view-container tab-view-hidden-left";
+      }
+    } else if (tabId === "stats") {
+      if (quickBtn) quickBtn.style.display = "none";
+      if (archEl) archEl.style.display = "none";
+      if (straightBgEl) straightBgEl.classList.remove("hidden-dock-bg");
+
+      if (mapContainer) {
+        mapContainer.className = "tab-view-container tab-view-hidden-right";
+      }
+      if (collectionContainer) {
+        collectionContainer.className = "tab-view-container tab-view-hidden-right";
+      }
+      if (statsContainer) {
+        statsContainer.className = "tab-view-container tab-view-active";
+      }
     }
   }
 
