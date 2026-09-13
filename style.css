@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v50)
+   Potion Master: Wizard Sort - Style & Layout (v51)
    ========================================================================== */
 
 * {
@@ -392,7 +392,7 @@ body {
 /* Integrated Quick-Play Button inside Browser Tab Dome */
 .quick-play-btn {
   position: absolute;
-  top: -24px;
+  top: -42px;
   left: 50%;
   transform: translateX(-50%);
   height: 48px;
@@ -408,11 +408,10 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 18px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
   cursor: pointer;
   z-index: 30;
   transition: transform 0.2s, box-shadow 0.2s;
-  animation: pulseQuickPlay 2s infinite alternate;
 }
 
 .quick-play-btn:active {
@@ -421,11 +420,6 @@ body {
 
 .quick-play-icon {
   font-size: 15px;
-}
-
-@keyframes pulseQuickPlay {
-  0% { box-shadow: 0 4px 14px rgba(255, 215, 0, 0.4); }
-  100% { box-shadow: 0 8px 26px rgba(255, 215, 0, 0.9); }
 }
 
 /* ==========================================================================
