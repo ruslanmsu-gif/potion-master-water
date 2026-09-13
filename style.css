@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v45)
+   Potion Master: Wizard Sort - Style & Layout (v46)
    ========================================================================== */
 
 * {
@@ -350,27 +350,52 @@ body {
 }
 
 /* ==========================================================================
-   Floating Quick-Play Button (Pinned above bottom dock)
+   Integrated Bottom Dock Container & Arched Pedestal Crest
    ========================================================================== */
-.quick-play-btn {
+#bottom-dock-container {
+  position: relative;
+  width: 100%;
+  z-index: 35;
+}
+
+/* Golden Arched Pedestal springing out smoothly from Bottom Dock */
+.dock-pedestal-arch {
   position: absolute;
-  bottom: 85px;
+  top: -34px;
   left: 50%;
   transform: translateX(-50%);
-  height: 52px;
-  padding: 0 28px;
+  width: 220px;
+  height: 55px;
+  background: linear-gradient(180deg, rgba(28, 20, 42, 0.98) 0%, rgba(14, 10, 22, 0.98) 100%);
+  border-top: 2px solid #ffd700;
+  border-left: 2px solid rgba(255, 215, 0, 0.6);
+  border-right: 2px solid rgba(255, 215, 0, 0.6);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -6px 20px rgba(255, 215, 0, 0.35);
+  pointer-events: none;
+  z-index: 29;
+}
+
+/* Integrated Quick-Play Button inside Pedestal */
+.quick-play-btn {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 48px;
+  padding: 0 26px;
   background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
   border: 2px solid #fff;
-  border-radius: 26px;
+  border-radius: 24px;
   color: #140e22;
   font-family: 'Cinzel', serif;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 15px;
   letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.8);
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.8);
   cursor: pointer;
   z-index: 30;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -382,12 +407,12 @@ body {
 }
 
 .quick-play-icon {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 @keyframes pulseQuickPlay {
-  0% { box-shadow: 0 6px 18px rgba(255, 215, 0, 0.4); }
-  100% { box-shadow: 0 8px 28px rgba(255, 215, 0, 0.85); }
+  0% { box-shadow: 0 4px 14px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 8px 26px rgba(255, 215, 0, 0.9); }
 }
 
 /* ==========================================================================

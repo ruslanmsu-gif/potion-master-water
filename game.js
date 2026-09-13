@@ -1,4 +1,4 @@
-const GAME_VERSION = "v45";
+const GAME_VERSION = "v46";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -485,17 +485,21 @@ class GameEngine {
     if (activeTabBtn) activeTabBtn.classList.add("active");
 
     const quickBtn = document.getElementById("quick-play-btn");
+    const archEl = document.querySelector(".dock-pedestal-arch");
 
     if (tabId === "map") {
       if (quickBtn) quickBtn.style.display = "flex";
+      if (archEl) archEl.style.display = "block";
       this.closeModal("stats-modal");
       this.closeModal("collection-modal");
     } else if (tabId === "stats") {
       if (quickBtn) quickBtn.style.display = "none";
+      if (archEl) archEl.style.display = "none";
       this.openModal("stats-modal");
       this.closeModal("collection-modal");
     } else if (tabId === "collection") {
       if (quickBtn) quickBtn.style.display = "none";
+      if (archEl) archEl.style.display = "none";
       this.openModal("collection-modal");
       this.closeModal("stats-modal");
     }
