@@ -1,4 +1,4 @@
-const GAME_VERSION = "v40";
+const GAME_VERSION = "v41";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1086,34 +1086,6 @@ class FlaskView {
         g.moveTo(xL, Y_top - xL * slope);
         g.lineTo(xR, Y_top - xR * slope);
       }
-    }
-
-    // --- 6. UNIFIED SEAMLESS VERTICAL VELVET SHEEN OVERLAY (ONLY WHEN LIQUID IS PRESENT) ---
-    // Renders one clean, continuous, perfectly straight vertical highlight stripe from fluid bottom to wave top!
-    if (chunks.length > 0 && totalNominalH > 0) {
-      const topChunkPoints = [];
-      const waveTime = (this.engine ? (this.engine.time || performance.now() * 0.003) : 0);
-      const isRestingWave = (!isTilted && !this.isReceiving && !this.isCapped);
-
-      const hL = -w * 0.32;
-      const hR = -w * 0.18;
-      const step = 3;
-
-      for (let x = hL; x <= hR; x += step) {
-        const wave = isRestingWave ? Math.sin(waveTime * 3.5 + x * 0.18) * 1.8 : 0;
-        topChunkPoints.push(x, topSurfaceY - x * slope + wave);
-      }
-
-      const sheenPoly = [];
-      for (let i = 0; i < topChunkPoints.length; i += 2) {
-        sheenPoly.push(topChunkPoints[i], topChunkPoints[i + 1]);
-      }
-      // Bottom clamp into rounded glass base
-      sheenPoly.push(hR, yBottomClamp, hL, yBottomClamp);
-
-      g.beginFill(0xffffff, 0.18);
-      g.drawPolygon(sheenPoly);
-      g.endFill();
     }
   }
 
