@@ -1,7 +1,4 @@
-/**
- * Potion Master: Wizard Sort
- * Realistic Deep Fluid Injection & Dynamic Meniscus Engine (Pixi.js WebGL)
- */
+const GAME_VERSION = "v34";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -87,7 +84,7 @@ class GameEngine {
 
     const levelSub = document.getElementById("level-sub");
     if (levelSub) {
-      levelSub.textContent = `Novice Alchemist (v30)`;
+      levelSub.textContent = `Novice Alchemist (${GAME_VERSION})`;
     }
 
     // Floating Parchment Recipe HUD Banner
