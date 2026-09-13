@@ -1,4 +1,4 @@
-const GAME_VERSION = "v55";
+const GAME_VERSION = "v56";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
