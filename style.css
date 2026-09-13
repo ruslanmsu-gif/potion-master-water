@@ -615,7 +615,7 @@ body {
   position: absolute;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.42) 0%, rgba(255, 185, 0, 0.18) 42%, rgba(255, 215, 0, 0) 72%);
+  background: radial-gradient(ellipse at center, rgba(64, 224, 255, 0.52) 0%, rgba(30, 144, 255, 0.24) 45%, rgba(0, 200, 255, 0) 75%);
   filter: blur(18px);
   pointer-events: none;
   transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1), top 0.35s cubic-bezier(0.25, 1, 0.5, 1);
