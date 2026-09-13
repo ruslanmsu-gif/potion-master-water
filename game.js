@@ -292,6 +292,7 @@ class GameEngine {
     const banner = document.getElementById("tutorial-banner");
     const target = document.getElementById("tutorial-target");
     const finger = document.getElementById("tutorial-finger");
+    const glow = document.getElementById("tutorial-glow");
 
     if (!overlay || !banner || !target || !finger) return;
 
@@ -325,11 +326,18 @@ class GameEngine {
     banner.textContent = preset.hintText;
 
     const x = targetFlask.baseX;
-    // Position target below the bottom of the flask
-    const y = targetFlask.baseY + targetFlask.height + 40;
+    const centerY = targetFlask.baseY + targetFlask.height / 2;
+    const bottomY = targetFlask.baseY + targetFlask.height + 40;
+
+    if (glow) {
+      glow.style.left = `${x}px`;
+      glow.style.top = `${centerY}px`;
+      glow.style.width = `${targetFlask.width * 2.2}px`;
+      glow.style.height = `${targetFlask.height * 1.35}px`;
+    }
 
     target.style.left = `${x}px`;
-    target.style.top = `${y}px`;
+    target.style.top = `${bottomY}px`;
   }
 
   onFlaskClicked(flask) {
@@ -1503,35 +1511,12 @@ class FlaskView {
     }
   }
 
-  drawTutorialAura(time) {
-    const g = this.auraGfx;
-    if (!g) return;
-    g.clear();
-    if (!this.isTutorialPulse || this.isSelected) return;
-
-    const w = this.width;
-    const h = this.height;
-    const pulseAlpha = 0.16 + Math.sin(time * 1.4) * 0.08;
-
-    // Outer soft ambient misty glow behind flask
-    g.beginFill(0xffd700, pulseAlpha * 0.4);
-    g.drawEllipse(0, h / 2, w * 1.0, h * 0.62);
-    g.endFill();
-
-    // Inner warm core mist
-    g.beginFill(0xfff5a0, pulseAlpha * 0.65);
-    g.drawEllipse(0, h / 2, w * 0.68, h * 0.48);
-    g.endFill();
-  }
-
   updateVFX(time) {
     if (this.isTutorialPulse && !this.isSelected) {
       // Very smooth, gentle scale breathing (~2% variation, slow tempo)
       const pulseScale = 1 + Math.sin(time * 1.4) * 0.022;
       this.container.scale.set(pulseScale, pulseScale);
-      this.drawTutorialAura(time);
     } else {
-      if (this.auraGfx) this.auraGfx.clear();
       if (!this.isSelected && (this.container.scale.x !== 1 || this.container.scale.y !== 1)) {
         this.container.scale.set(1, 1);
       }
