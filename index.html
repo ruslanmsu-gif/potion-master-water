@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Potion Master: Wizard Sort</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
-  <link rel="stylesheet" href="style.css?v=60">
+  <link rel="stylesheet" href="style.css?v=61">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=MedievalSharp&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         </div>
         <div class="header-center">
           <h1 class="app-title">POTION MASTER</h1>
-          <p class="app-sub">Wizard Sort (v60)</p>
+          <p class="app-sub">Wizard Sort (v61)</p>
         </div>
         <div class="header-right">
           <button id="btn-main-sound" class="icon-btn" title="Звук">🔊</button>
@@ -36,28 +36,48 @@
 
       <!-- Main Tabs Viewport for Smooth Slide Transitions -->
       <div id="main-tabs-viewport">
-        <!-- 1. Statistics Tab View -->
+        <!-- 1. Statistics & Leaderboard Tab View -->
         <div id="stats-tab-container" class="tab-view-container tab-view-hidden-left">
           <div class="tab-view-header">
-            <h2>📊 СТАТИСТИКА</h2>
+            <h2>🏆 РЕЙТИНГ И СТАТИСТИКА</h2>
           </div>
+
+          <!-- Personal Player Banner -->
+          <div class="personal-rank-card" id="personal-rank-card">
+            <div class="user-badge-rank" id="user-badge-rank">#4</div>
+            <div class="user-avatar-icon">🧙‍♂️</div>
+            <div class="user-info">
+              <span class="user-name">ВЫ (Гарри Поттер)</span>
+              <span class="user-house" id="user-house-label">🦁 Gryffindor • Магистр Зелий</span>
+            </div>
+            <div class="user-stats-pill" id="user-stats-pill">1,250 pts</div>
+          </div>
+
+          <!-- Leaderboard Timeframe Tabs -->
           <div class="stats-tabs">
             <button class="stats-tab active" data-subtab="all-time">За всё время</button>
             <button class="stats-tab" data-subtab="week">За неделю</button>
             <button class="stats-tab" data-subtab="today">За сегодня</button>
           </div>
+
+          <!-- Top-10 Leaderboard List -->
+          <div class="leaderboard-list" id="leaderboard-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- Overview Stat Cards -->
           <div class="stats-body" id="stats-body-content">
             <div class="stat-card">
-              <span class="stat-value" id="stat-completed-levels">0</span>
-              <span class="stat-label">Уровней пройдено</span>
+              <span class="stat-value" id="stat-completed-levels">1</span>
+              <span class="stat-label">Уровень</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value" id="stat-brewed-potions">0</span>
+              <span class="stat-value" id="stat-brewed-potions">1</span>
               <span class="stat-label">Зелий сварено</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value" id="stat-perfect-sorts">0</span>
-              <span class="stat-label">Идеальных сортировок</span>
+              <span class="stat-value" id="stat-perfect-sorts">100%</span>
+              <span class="stat-label">Точность</span>
             </div>
           </div>
         </div>
@@ -252,9 +272,9 @@
 
   </div>
 
-  <script src="levels.js?v=48"></script>
-  <script src="audio.js?v=48"></script>
-  <script src="game.js?v=48"></script>
+  <script src="levels.js?v=61"></script>
+  <script src="audio.js?v=61"></script>
+  <script src="game.js?v=61"></script>
 </body>
 </html>
 

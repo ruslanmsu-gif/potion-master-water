@@ -1,4 +1,43 @@
-const GAME_VERSION = "v60";
+const GAME_VERSION = "v61";
+
+const LEADERBOARD_DATA = {
+  "all-time": [
+    { rank: 1, name: "Albus Dumbledore", title: "Великий Чародей", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "34,800", level: 150, isUser: false },
+    { rank: 2, name: "Lord Voldemort", title: "Повелитель Теней", avatar: "🔮", house: "🐍 Slytherin", score: "31,400", level: 142, isUser: false },
+    { rank: 3, name: "Gellert Grindelwald", title: "Мастер Алхимии", avatar: "⚡", house: "🐍 Slytherin", score: "28,900", level: 135, isUser: false },
+    { rank: 4, name: "ВЫ (Гарри Поттер)", title: "Магистр Зелий", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "24,500", level: 100, isUser: true },
+    { rank: 5, name: "Minerva McGonagall", title: "Декан Факультета", avatar: "🦉", house: "🦁 Gryffindor", score: "21,200", level: 92, isUser: false },
+    { rank: 6, name: "Hermione Granger", title: "Знаток Рецептов", avatar: "📚", house: "🦁 Gryffindor", score: "19,800", level: 88, isUser: false },
+    { rank: 7, name: "Severus Snape", title: "Зельевар-Виртуоз", avatar: "🧪", house: "🐍 Slytherin", score: "18,100", level: 84, isUser: false },
+    { rank: 8, name: "Remus Lupin", title: "Хранитель Огня", avatar: "🐺", house: "🦡 Hufflepuff", score: "15,600", level: 75, isUser: false },
+    { rank: 9, name: "Sirius Black", title: "Тёмный Чародей", avatar: "🐾", house: "🦁 Gryffindor", score: "14,200", level: 71, isUser: false },
+    { rank: 10, name: "Luna Lovegood", title: "Мистический Адепт", avatar: "✨", house: "🦅 Ravenclaw", score: "12,800", level: 66, isUser: false }
+  ],
+  "week": [
+    { rank: 1, name: "Hermione Granger", title: "Знаток Рецептов", avatar: "📚", house: "🦁 Gryffindor", score: "4,850", level: 28, isUser: false },
+    { rank: 2, name: "Severus Snape", title: "Зельевар-Виртуоз", avatar: "🧪", house: "🐍 Slytherin", score: "4,200", level: 24, isUser: false },
+    { rank: 3, name: "ВЫ (Гарри Поттер)", title: "Магистр Зелий", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "3,900", level: 21, isUser: true },
+    { rank: 4, name: "Albus Dumbledore", title: "Великий Чародей", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "3,500", level: 19, isUser: false },
+    { rank: 5, name: "Draco Malfoy", title: "Адепт Слизерина", avatar: "🐍", house: "🐍 Slytherin", score: "3,100", level: 17, isUser: false },
+    { rank: 6, name: "Ron Weasley", title: "Рыцарь Гриффиндора", avatar: "♟️", house: "🦁 Gryffindor", score: "2,800", level: 15, isUser: false },
+    { rank: 7, name: "Cedric Diggory", title: "Чемпион Пуффендуя", avatar: "🏆", house: "🦡 Hufflepuff", score: "2,450", level: 13, isUser: false },
+    { rank: 8, name: "Cho Chang", title: "Ловец Когтеврана", avatar: "🦅", house: "🦅 Ravenclaw", score: "2,100", level: 11, isUser: false },
+    { rank: 9, name: "Neville Longbottom", title: "Мастер Травологии", avatar: "🌱", house: "🦁 Gryffindor", score: "1,850", level: 9, isUser: false },
+    { rank: 10, name: "Ginny Weasley", title: "Виртуоз Зелий", avatar: "🧹", house: "🦁 Gryffindor", score: "1,500", level: 8, isUser: false }
+  ],
+  "today": [
+    { rank: 1, name: "ВЫ (Гарри Поттер)", title: "Магистр Зелий", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "1,250", level: 7, isUser: true },
+    { rank: 2, name: "Hermione Granger", title: "Знаток Рецептов", avatar: "📚", house: "🦁 Gryffindor", score: "1,100", level: 6, isUser: false },
+    { rank: 3, name: "Draco Malfoy", title: "Адепт Слизерина", avatar: "🐍", house: "🐍 Slytherin", score: "950", level: 5, isUser: false },
+    { rank: 4, name: "Ron Weasley", title: "Рыцарь Гриффиндора", avatar: "♟️", house: "🦁 Gryffindor", score: "820", level: 4, isUser: false },
+    { rank: 5, name: "Luna Lovegood", title: "Мистический Адепт", avatar: "✨", house: "🦅 Ravenclaw", score: "710", level: 4, isUser: false },
+    { rank: 6, name: "Neville Longbottom", title: "Мастер Травологии", avatar: "🌱", house: "🦁 Gryffindor", score: "600", level: 3, isUser: false },
+    { rank: 7, name: "Cho Chang", title: "Ловец Когтеврана", avatar: "🦅", house: "🦅 Ravenclaw", score: "520", level: 3, isUser: false },
+    { rank: 8, name: "Fred Weasley", title: "Изобретатель", avatar: "💥", house: "🦁 Gryffindor", score: "440", level: 2, isUser: false },
+    { rank: 9, name: "George Weasley", title: "Изобретатель", avatar: "🎆", house: "🦁 Gryffindor", score: "420", level: 2, isUser: false },
+    { rank: 10, name: "Seamus Finnigan", title: "Новичк-Алхимик", avatar: "💣", house: "🦁 Gryffindor", score: "310", level: 1, isUser: false }
+  ]
+};
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -389,9 +428,54 @@ class GameEngine {
     }
   }
 
+  renderLeaderboard(period = "all-time") {
+    const listEl = document.getElementById("leaderboard-list");
+    if (!listEl) return;
+
+    const dataset = LEADERBOARD_DATA[period] || LEADERBOARD_DATA["all-time"];
+    listEl.innerHTML = "";
+
+    dataset.forEach(item => {
+      const el = document.createElement("div");
+      
+      let rankClass = item.rank <= 3 ? `rank-${item.rank}` : "";
+      let badgeClass = item.rank <= 3 ? `rank-${item.rank}` : "rank-normal";
+      let userClass = item.isUser ? "is-user" : "";
+
+      el.className = `leaderboard-item ${rankClass} ${userClass}`;
+
+      let crownOrRank = item.rank === 1 ? "🥇" : (item.rank === 2 ? "🥈" : (item.rank === 3 ? "🥉" : `#${item.rank}`));
+
+      el.innerHTML = `
+        <div class="lb-left">
+          <div class="rank-badge ${badgeClass}">${crownOrRank}</div>
+          <div class="player-avatar">${item.avatar}</div>
+          <div class="player-details">
+            <span class="player-name">${item.name}</span>
+            <span class="player-title">${item.house} • ${item.title}</span>
+          </div>
+        </div>
+        <div class="player-score">
+          <span class="score-pts">${item.score} pts</span>
+          <span class="score-level">Ур. ${item.level}</span>
+        </div>
+      `;
+
+      listEl.appendChild(el);
+
+      if (item.isUser) {
+        const userBadge = document.getElementById("user-badge-rank");
+        const userPill = document.getElementById("user-stats-pill");
+        if (userBadge) userBadge.textContent = `#${item.rank}`;
+        if (userPill) userPill.textContent = `${item.score} pts`;
+      }
+    });
+  }
+
   initMainScreen() {
     this.renderSagaNodes();
     this.populateCollectionGrid();
+    this.renderLeaderboard("all-time");
 
     // Scroll to bottom (Chapter 1) on load
     const sagaContainer = document.getElementById("saga-map-container");
@@ -622,8 +706,15 @@ class GameEngine {
     // Stats sub-tabs
     document.querySelectorAll(".stats-tab").forEach(btn => {
       btn.addEventListener("click", (e) => {
-        document.querySelectorAll(".stats-tab").forEach(t => t.classList.remove("active"));
-        e.target.classList.add("active");
+        const subtab = e.target.getAttribute("data-subtab") || "all-time";
+        document.querySelectorAll(".stats-tab").forEach(t => {
+          if (t.getAttribute("data-subtab") === subtab) {
+            t.classList.add("active");
+          } else {
+            t.classList.remove("active");
+          }
+        });
+        this.renderLeaderboard(subtab);
       });
     });
 
