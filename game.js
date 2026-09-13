@@ -1,4 +1,4 @@
-const GAME_VERSION = "v36";
+const GAME_VERSION = "v37";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -425,7 +425,6 @@ class FlaskView {
     });
 
     // Sub-layers
-    this.auraGfx = new PIXI.Graphics();
     this.glassBody = new PIXI.Graphics();
     this.maskGfx = new PIXI.Graphics();
     this.liquidGfx = new PIXI.Graphics();
@@ -443,8 +442,6 @@ class FlaskView {
     this.capGfx = new PIXI.Graphics();
     this.capParticlesGfx = new PIXI.Graphics();
 
-    // Aura is added at index 0 so it stays strictly BEHIND the flask!
-    this.container.addChild(this.auraGfx);
     this.container.addChild(this.glassBody);
     this.container.addChild(this.maskGfx);
     this.container.addChild(this.liquidContainer);
@@ -549,30 +546,6 @@ class FlaskView {
     this.isSelected = selected;
     const targetY = selected ? this.baseY - 32 : this.baseY;
     this.animateProperty(this.container, "y", targetY, 150);
-    this.drawAura();
-    this.drawGlass();
-  }
-
-  drawAura() {
-    const a = this.auraGfx;
-    a.clear();
-
-    if (!this.isSelected) return;
-
-    const w = this.width;
-    const h = this.height;
-    const pulseTime = this.engine ? (this.engine.time || performance.now() * 0.003) : 0;
-    const pulse = 0.38 + Math.sin(pulseTime * 3.2) * 0.12;
-
-    // 1. Soft wide outer magic halo behind flask (ethereal amethyst & gold)
-    a.beginFill(0xab47bc, pulse * 0.25);
-    a.drawRoundedRect(-w * 0.80, -10, w * 1.6, h + 20, (w * 1.6) / 2);
-    a.endFill();
-
-    // 2. Inner warm golden magic glow core
-    a.beginFill(0xffd54f, pulse * 0.30);
-    a.drawRoundedRect(-w * 0.60, -4, w * 1.2, h + 8, (w * 1.2) / 2);
-    a.endFill();
   }
 
   drawGlass() {
@@ -1107,10 +1080,6 @@ class FlaskView {
   }
 
   updateVFX(time) {
-    if (this.isSelected) {
-      this.drawAura();
-    }
-
     const wG = this.waveGfx;
     const sG = this.sparklesGfx;
     wG.clear();
