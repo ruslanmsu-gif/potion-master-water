@@ -617,17 +617,10 @@ class FlaskView {
     this.drawFrontRim(gH, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
     this.drawFrontRim(gH, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
 
-    // Left Specular Highlight Stripe (cleanly stops before the bottom semicircle curvature)
-    gH.lineStyle(3.5, 0xffffff, 0.85);
-    gH.moveTo(-w * 0.36, flareY + 2);
-    gH.lineTo(-w * 0.36, bottomArcY - 2);
-
     // Right subtle reflection (cleanly stops before the bottom semicircle curvature)
     gH.lineStyle(1.5, 0xffffff, 0.35);
     gH.moveTo(w * 0.36, flareY + 4);
     gH.lineTo(w * 0.36, bottomArcY - 5);
-
-    this.drawStar(gH, -w * 0.36, flareY + 4, 4, 0xffffff);
 
     if (this.isMasterVessel) {
       // Golden Crown Crest & Ruby Gem on Master Crucible Neck
