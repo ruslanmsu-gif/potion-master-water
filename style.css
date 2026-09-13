@@ -614,36 +614,23 @@ body {
 #tutorial-target {
   position: absolute;
   transform: translate(-50%, -50%);
-  transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1), top 0.35s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none;
-}
-
-#tutorial-oval {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px dashed #ffd700;
-  border-radius: 40px;
-  box-shadow: 0 0 18px rgba(255, 215, 0, 0.7), inset 0 0 12px rgba(255, 215, 0, 0.3);
-  animation: ovalPulseAnim 1.6s ease-in-out infinite alternate;
-}
-
-@keyframes ovalPulseAnim {
-  from { box-shadow: 0 0 14px rgba(255, 215, 0, 0.5), inset 0 0 8px rgba(255, 215, 0, 0.2); transform: translate(-50%, -50%) scale(0.98); }
-  to { box-shadow: 0 0 28px rgba(255, 215, 0, 0.95), inset 0 0 18px rgba(255, 215, 0, 0.5); transform: translate(-50%, -50%) scale(1.04); }
 }
 
 #tutorial-finger {
   position: absolute;
-  font-size: 42px;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8));
-  animation: fingerTapAnim 1.1s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  font-size: 46px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+  animation: fingerTapUpAnim 1.1s ease-in-out infinite;
 }
 
-@keyframes fingerTapAnim {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-14px, 0) scale(1.18); }
+@keyframes fingerTapUpAnim {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -64%) scale(1.18); }
 }
 
 #canvas-container {

@@ -291,10 +291,9 @@ class GameEngine {
     const overlay = document.getElementById("tutorial-overlay");
     const banner = document.getElementById("tutorial-banner");
     const target = document.getElementById("tutorial-target");
-    const oval = document.getElementById("tutorial-oval");
     const finger = document.getElementById("tutorial-finger");
 
-    if (!overlay || !banner || !target || !oval || !finger) return;
+    if (!overlay || !banner || !target || !finger) return;
 
     const preset = (typeof PRESET_LEVELS !== 'undefined' && this.currentLevel <= PRESET_LEVELS.length)
       ? PRESET_LEVELS[this.currentLevel - 1]
@@ -302,6 +301,7 @@ class GameEngine {
 
     if (!preset || !preset.hintText || this.isBusy) {
       overlay.classList.add("hidden");
+      this.flasks.forEach(f => { f.isTutorialPulse = false; });
       return;
     }
 
@@ -312,6 +312,10 @@ class GameEngine {
       targetFlask = (this.selectedFlask.index === 0 && this.flasks.length > 1) ? this.flasks[1] : null;
     }
 
+    this.flasks.forEach(f => {
+      f.isTutorialPulse = (f === targetFlask);
+    });
+
     if (!targetFlask) {
       overlay.classList.add("hidden");
       return;
@@ -320,19 +324,12 @@ class GameEngine {
     overlay.classList.remove("hidden");
     banner.textContent = preset.hintText;
 
-    const fw = targetFlask.width;
-    const fh = targetFlask.height;
     const x = targetFlask.baseX;
-    const y = targetFlask.baseY;
+    // Position target below the bottom of the flask
+    const y = targetFlask.baseY + targetFlask.height + 40;
 
     target.style.left = `${x}px`;
     target.style.top = `${y}px`;
-
-    oval.style.width = `${fw + 28}px`;
-    oval.style.height = `${fh + 28}px`;
-
-    finger.style.left = `${fw / 2 + 16}px`;
-    finger.style.top = `-10px`;
   }
 
   onFlaskClicked(flask) {
@@ -1505,6 +1502,13 @@ class FlaskView {
   }
 
   updateVFX(time) {
+    if (this.isTutorialPulse && !this.isSelected) {
+      const pulseScale = 1 + Math.sin(time * 3.2) * 0.055;
+      this.container.scale.set(pulseScale, pulseScale);
+    } else if (!this.isSelected && (this.container.scale.x !== 1 || this.container.scale.y !== 1)) {
+      this.container.scale.set(1, 1);
+    }
+
     const wG = this.waveGfx;
     const sG = this.sparklesGfx;
     wG.clear();
