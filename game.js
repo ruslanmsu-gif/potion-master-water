@@ -1066,9 +1066,9 @@ class FlaskView {
       ]);
       g.endFill();
 
-      // 4. Boundary line between DIFFERENT colors
+      // 4. Subtle boundary line between DIFFERENT colors
       if (c < chunks.length - 1) {
-        g.lineStyle(2, 0xffffff, 0.35);
+        g.lineStyle(1, color.glow, 0.25);
         g.moveTo(xL, yTL);
         g.lineTo(xR, yTR);
       }
@@ -1100,10 +1100,10 @@ class FlaskView {
       const surfaceY = (h - 8) - count * layerH;
 
       // Animated gentle wave at the top resting surface
-      wG.lineStyle(2.5, 0xffffff, 0.9);
+      wG.lineStyle(1.5, 0xffffff, 0.45);
       wG.moveTo(-w / 2, surfaceY);
       for (let x = -w / 2; x <= w / 2; x += 3) {
-        const wave = Math.sin(time * 3.5 + x * 0.18) * 2.2;
+        const wave = Math.sin(time * 3.5 + x * 0.18) * 1.8;
         wG.lineTo(x, surfaceY + wave);
       }
 
