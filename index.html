@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Potion Master: Wizard Sort</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
-  <link rel="stylesheet" href="style.css?v=47">
+  <link rel="stylesheet" href="style.css?v=48">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=MedievalSharp&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         </div>
         <div class="header-center">
           <h1 class="app-title">POTION MASTER</h1>
-          <p class="app-sub">Wizard Sort (v47)</p>
+          <p class="app-sub">Wizard Sort (v48)</p>
         </div>
         <div class="header-right">
           <button id="btn-main-sound" class="icon-btn" title="Звук">🔊</button>
@@ -64,7 +64,10 @@
 
       <!-- Integrated Bottom Dock Navigation Area with Seamless Tab Contour -->
       <div id="bottom-dock-container">
-        <!-- SVG Seamless Browser Tab Contour -->
+        <!-- Straight Dock Background (active for Stats / Collection tabs) -->
+        <div class="dock-straight-bg hidden-dock-bg"></div>
+
+        <!-- SVG Wide 190px Seamless Browser Tab Contour (active for Map tab) -->
         <svg class="dock-border-svg" viewBox="0 0 460 75" preserveAspectRatio="none">
           <defs>
             <linearGradient id="dockBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -72,7 +75,10 @@
               <stop offset="100%" stop-color="rgba(14, 10, 22, 0.99)" />
             </linearGradient>
           </defs>
-          <path d="M 0,35 L 115,35 C 145,35 140,2 170,2 L 290,2 C 320,2 315,35 345,35 L 460,35 L 460,75 L 0,75 Z" fill="url(#dockBgGrad)" stroke="#ffd700" stroke-width="2" />
+          <!-- 1. Fill Path (Closed, No Stroke) -->
+          <path d="M 0,35 L 80,35 C 110,35 105,2 135,2 L 325,2 C 355,2 350,35 380,35 L 460,35 L 460,75 L 0,75 Z" fill="url(#dockBgGrad)" />
+          <!-- 2. Top-Only Golden Stroke Path (Open Line on Top Edge Only) -->
+          <path d="M 0,35 L 80,35 C 110,35 105,2 135,2 L 325,2 C 355,2 350,35 380,35 L 460,35" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round" />
         </svg>
 
         <!-- Integrated Quick-Play Button -->
@@ -109,7 +115,7 @@
         </div>
         <div class="header-center">
           <h1 id="level-title">LEVEL 1</h1>
-          <p id="level-sub">Novice Alchemist (v47)</p>
+          <p id="level-sub">Novice Alchemist (v48)</p>
         </div>
         <div class="header-right">
           <button id="btn-sound" class="icon-btn" title="Звук">🔊</button>
@@ -206,9 +212,9 @@
 
   </div>
 
-  <script src="levels.js?v=47"></script>
-  <script src="audio.js?v=47"></script>
-  <script src="game.js?v=47"></script>
+  <script src="levels.js?v=48"></script>
+  <script src="audio.js?v=48"></script>
+  <script src="game.js?v=48"></script>
 </body>
 </html>
 
