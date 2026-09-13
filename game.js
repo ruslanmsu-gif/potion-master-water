@@ -283,6 +283,56 @@ class GameEngine {
       this.flasks[i].setSize(flaskWidth, flaskHeight);
       this.flasks[i].setBasePosition(targetX, targetY);
     }
+
+    this.updateTutorialOverlay();
+  }
+
+  updateTutorialOverlay() {
+    const overlay = document.getElementById("tutorial-overlay");
+    const banner = document.getElementById("tutorial-banner");
+    const target = document.getElementById("tutorial-target");
+    const oval = document.getElementById("tutorial-oval");
+    const finger = document.getElementById("tutorial-finger");
+
+    if (!overlay || !banner || !target || !oval || !finger) return;
+
+    const preset = (typeof PRESET_LEVELS !== 'undefined' && this.currentLevel <= PRESET_LEVELS.length)
+      ? PRESET_LEVELS[this.currentLevel - 1]
+      : null;
+
+    if (!preset || !preset.hintText || this.isBusy) {
+      overlay.classList.add("hidden");
+      return;
+    }
+
+    let targetFlask = null;
+    if (!this.selectedFlask) {
+      targetFlask = this.flasks[0];
+    } else {
+      targetFlask = (this.selectedFlask.index === 0 && this.flasks.length > 1) ? this.flasks[1] : null;
+    }
+
+    if (!targetFlask) {
+      overlay.classList.add("hidden");
+      return;
+    }
+
+    overlay.classList.remove("hidden");
+    banner.textContent = preset.hintText;
+
+    const fw = targetFlask.width;
+    const fh = targetFlask.height;
+    const x = targetFlask.baseX;
+    const y = targetFlask.baseY;
+
+    target.style.left = `${x}px`;
+    target.style.top = `${y}px`;
+
+    oval.style.width = `${fw + 28}px`;
+    oval.style.height = `${fh + 28}px`;
+
+    finger.style.left = `${fw / 2 + 16}px`;
+    finger.style.top = `-10px`;
   }
 
   onFlaskClicked(flask) {
@@ -314,10 +364,13 @@ class GameEngine {
         }
       }
     }
+
+    this.updateTutorialOverlay();
   }
 
   async executePour(from, to) {
     this.isBusy = true;
+    this.updateTutorialOverlay();
 
     const amount = from.getAmountToPour(to);
     const colorId = from.topColor();
