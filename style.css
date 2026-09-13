@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v57)
+   Potion Master: Wizard Sort - Style & Layout (v58)
    ========================================================================== */
 
 * {
@@ -413,6 +413,7 @@ body {
   position: relative;
   width: 100%;
   z-index: 35;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Straight Dock Background (for Stats / Collection tabs) */
@@ -505,6 +506,11 @@ body {
   padding: 5px 12px;
   border-radius: 8px;
   transition: all 0.2s;
+}
+
+.dock-tab:active {
+  transform: scale(0.93);
+  opacity: 0.85;
 }
 
 .dock-icon {
