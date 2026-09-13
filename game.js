@@ -1,4 +1,4 @@
-const GAME_VERSION = "v38";
+const GAME_VERSION = "v39";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1006,7 +1006,7 @@ class FlaskView {
       topSurfaceY = nominalTopY - lift;
     }
 
-    // --- 5. Render each chunk with solid bottom anchoring & seamless parallel boundaries ---
+    // 5. Render each chunk with solid bottom anchoring & seamless parallel boundaries
     const xL = -w / 2 - 15;
     const xR = w / 2 + 15;
     const yBottomClamp = h + 60; // Deep clamp into the mask for anatomical rounded glass bottom
@@ -1021,18 +1021,33 @@ class FlaskView {
       const Y_bot = boundaries[c];
       const Y_top = isTopChunk ? topSurfaceY : boundaries[c + 1];
 
-      // Slanted top boundary
-      const yTL = Y_top - xL * slope;
-      const yTR = Y_top - xR * slope;
+      // Slanted top boundary with animated wave for resting top-most layer
+      const waveTime = (this.engine ? (this.engine.time || performance.now() * 0.003) : 0);
+      const isRestingWave = (isTopChunk && !isTilted && !this.isReceiving && !this.isCapped);
+
+      // Generate top surface curve points
+      const topCurvePoints = [];
+      const step = 3;
+      for (let x = xL; x <= xR; x += step) {
+        const wave = isRestingWave ? Math.sin(waveTime * 3.5 + x * 0.18) * 1.8 : 0;
+        const yVal = Y_top - x * slope + wave;
+        topCurvePoints.push({ x: x, y: yVal });
+      }
 
       // Bottom boundary: Chunk 0 is ALWAYS solidly anchored to the glass bottom (clipped by maskGfx).
       // Higher chunks strictly match the top boundary of the chunk below them!
       const yBL = isBottomChunk ? yBottomClamp : (Y_bot - xL * slope);
       const yBR = isBottomChunk ? yBottomClamp : (Y_bot - xR * slope);
 
-      // 1. Solid fluid body
+      // 1. Solid fluid body (following wave on top edge)
+      const bodyPoly = [];
+      for (let p of topCurvePoints) {
+        bodyPoly.push(p.x, p.y);
+      }
+      bodyPoly.push(xR, yBR, xL, yBL);
+
       g.beginFill(color.inner, 0.95);
-      g.drawPolygon([xL, yTL, xR, yTR, xR, yBR, xL, yBL]);
+      g.drawPolygon(bodyPoly);
       g.endFill();
 
       // 2. Luminous core
@@ -1040,13 +1055,22 @@ class FlaskView {
       const coreR = w * 0.36;
       const coreBL = isBottomChunk ? yBottomClamp : (Y_bot - coreL * slope);
       const coreBR = isBottomChunk ? yBottomClamp : (Y_bot - coreR * slope);
+      
+      const coreTopPoints = [];
+      for (let p of topCurvePoints) {
+        if (p.x >= coreL && p.x <= coreR) {
+          coreTopPoints.push(p.x, p.y);
+        }
+      }
+
+      const corePoly = [];
+      for (let i = 0; i < coreTopPoints.length; i += 2) {
+        corePoly.push(coreTopPoints[i], coreTopPoints[i + 1]);
+      }
+      corePoly.push(coreR, coreBR, coreL, coreBL);
+
       g.beginFill(color.hex, 0.85);
-      g.drawPolygon([
-        coreL, Y_top - coreL * slope,
-        coreR, Y_top - coreR * slope,
-        coreR, coreBR,
-        coreL, coreBL
-      ]);
+      g.drawPolygon(corePoly);
       g.endFill();
 
       // 3. Highlight sheen
@@ -1054,27 +1078,36 @@ class FlaskView {
       const hR = -w * 0.16;
       const hBL = isBottomChunk ? yBottomClamp : (Y_bot - hL * slope);
       const hBR = isBottomChunk ? yBottomClamp : (Y_bot - hR * slope);
+      
+      const sheenTopPoints = [];
+      for (let p of topCurvePoints) {
+        if (p.x >= hL && p.x <= hR) {
+          sheenTopPoints.push(p.x, p.y);
+        }
+      }
+
+      const sheenPoly = [];
+      for (let i = 0; i < sheenTopPoints.length; i += 2) {
+        sheenPoly.push(sheenTopPoints[i], sheenTopPoints[i + 1]);
+      }
+      sheenPoly.push(hR, hBR, hL, hBL);
+
       g.beginFill(color.glow, 0.35);
-      g.drawPolygon([
-        hL, Y_top - hL * slope,
-        hR, Y_top - hR * slope,
-        hR, hBR,
-        hL, hBL
-      ]);
+      g.drawPolygon(sheenPoly);
       g.endFill();
 
       // 4. Subtle boundary line between DIFFERENT colors
       if (c < chunks.length - 1) {
         g.lineStyle(1, color.glow, 0.25);
-        g.moveTo(xL, yTL);
-        g.lineTo(xR, yTR);
+        g.moveTo(xL, Y_top - xL * slope);
+        g.lineTo(xR, Y_top - xR * slope);
       }
 
       // 5. Surface meniscus line on top-most fluid layer
       if (isTopChunk && isTilted) {
         g.lineStyle(2.5, 0xffffff, 0.75);
-        g.moveTo(xL, yTL);
-        g.lineTo(xR, yTR);
+        g.moveTo(xL, Y_top - xL * slope);
+        g.lineTo(xR, Y_top - xR * slope);
       }
     }
   }
@@ -1090,6 +1123,7 @@ class FlaskView {
 
     // Do not draw resting surface wave while tilted, actively receiving liquid, or capped
     if (Math.abs(this.container.rotation) <= 0.05 && !this.isReceiving && !this.isCapped) {
+      this.drawLiquids(); // Re-render animated fluid polygon body matching wave!
       const topColor = PALETTE[this.topColor()];
       const w = this.width;
       const h = this.height;
