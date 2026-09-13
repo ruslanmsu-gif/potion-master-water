@@ -1,4 +1,4 @@
-const GAME_VERSION = "v35";
+const GAME_VERSION = "v36";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -425,6 +425,7 @@ class FlaskView {
     });
 
     // Sub-layers
+    this.auraGfx = new PIXI.Graphics();
     this.glassBody = new PIXI.Graphics();
     this.maskGfx = new PIXI.Graphics();
     this.liquidGfx = new PIXI.Graphics();
@@ -442,6 +443,8 @@ class FlaskView {
     this.capGfx = new PIXI.Graphics();
     this.capParticlesGfx = new PIXI.Graphics();
 
+    // Aura is added at index 0 so it stays strictly BEHIND the flask!
+    this.container.addChild(this.auraGfx);
     this.container.addChild(this.glassBody);
     this.container.addChild(this.maskGfx);
     this.container.addChild(this.liquidContainer);
@@ -546,7 +549,30 @@ class FlaskView {
     this.isSelected = selected;
     const targetY = selected ? this.baseY - 32 : this.baseY;
     this.animateProperty(this.container, "y", targetY, 150);
+    this.drawAura();
     this.drawGlass();
+  }
+
+  drawAura() {
+    const a = this.auraGfx;
+    a.clear();
+
+    if (!this.isSelected) return;
+
+    const w = this.width;
+    const h = this.height;
+    const pulseTime = this.engine ? (this.engine.time || performance.now() * 0.003) : 0;
+    const pulse = 0.38 + Math.sin(pulseTime * 3.2) * 0.12;
+
+    // 1. Soft wide outer magic halo behind flask (ethereal amethyst & gold)
+    a.beginFill(0xab47bc, pulse * 0.25);
+    a.drawRoundedRect(-w * 0.80, -10, w * 1.6, h + 20, (w * 1.6) / 2);
+    a.endFill();
+
+    // 2. Inner warm golden magic glow core
+    a.beginFill(0xffd54f, pulse * 0.30);
+    a.drawRoundedRect(-w * 0.60, -4, w * 1.2, h + 8, (w * 1.2) / 2);
+    a.endFill();
   }
 
   drawGlass() {
@@ -607,24 +633,13 @@ class FlaskView {
     gH.quadraticCurveTo(w / 2, 6, wRim, 2);
 
     // Gold mouth rim crowning the flared vessel (split into back and front arcs for 3D occlusion)
-    const rimGoldColor = this.isSelected ? 0xffea00 : 0xffd700;
-    const rimAlpha = this.isSelected ? 1.0 : 0.95;
-
     // 1. Back golden rim arc (in backRimGfx, placed behind cork stopper)
-    this.drawBackRim(gBack, 0, 2, wRim, 6, 4, rimGoldColor, rimAlpha);
+    this.drawBackRim(gBack, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
     this.drawBackRim(gBack, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
 
     // 2. Front golden rim arc (in glassHighlights, placed in front of cork stopper)
-    this.drawFrontRim(gH, 0, 2, wRim, 6, 4, rimGoldColor, rimAlpha);
+    this.drawFrontRim(gH, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
     this.drawFrontRim(gH, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
-
-    // Selected state: Elegant Golden Rim Magic Glow Accent
-    if (this.isSelected) {
-      const pulseTime = this.engine ? (this.engine.time || performance.now() * 0.003) : 0;
-      const pulseAlpha = 0.40 + Math.sin(pulseTime * 4.5) * 0.20;
-      this.drawFrontRim(gH, 0, 2, wRim + 2.5, 7.5, 4.5, 0xffea00, pulseAlpha);
-      this.drawFrontRim(gH, 0, 0, wRim, 5, 2, 0xffffff, pulseAlpha * 0.85);
-    }
 
     if (this.isMasterVessel) {
       // Golden Crown Crest & Ruby Gem on Master Crucible Neck
@@ -1092,6 +1107,10 @@ class FlaskView {
   }
 
   updateVFX(time) {
+    if (this.isSelected) {
+      this.drawAura();
+    }
+
     const wG = this.waveGfx;
     const sG = this.sparklesGfx;
     wG.clear();
