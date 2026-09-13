@@ -1,4 +1,4 @@
-const GAME_VERSION = "v41";
+const GAME_VERSION = "v42";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1086,6 +1086,27 @@ class FlaskView {
         g.moveTo(xL, Y_top - xL * slope);
         g.lineTo(xR, Y_top - xR * slope);
       }
+    }
+
+    // --- VELVET GLASS SHEEN (one unified strip over all liquid, auto-clipped by mask) ---
+    // Drawn after all chunks so it spans full liquid height regardless of color count.
+    // Empty flask → chunks.length === 0 → this block is skipped → no sheen on empty flask.
+    if (chunks.length > 0 && totalNominalH > 0) {
+      const hL = -w * 0.40;
+      const hR = -w * 0.20;
+      const bigY = yBottomClamp;       // deep bottom (mask clips it)
+      const topY  = topSurfaceY - 4;  // slightly above wave top
+
+      // Layer 1 – wide whisper-soft glow
+      g.lineStyle(0);
+      g.beginFill(0xffffff, 0.07);
+      g.drawRect(hL, topY, hR - hL, bigY - topY);
+      g.endFill();
+
+      // Layer 2 – narrower brighter velvet core
+      g.beginFill(0xffffff, 0.10);
+      g.drawRect(-w * 0.36, topY, w * 0.10, bigY - topY);
+      g.endFill();
     }
   }
 
