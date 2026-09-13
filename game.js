@@ -1,4 +1,4 @@
-const GAME_VERSION = "v42";
+const GAME_VERSION = "v43";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1046,41 +1046,19 @@ class FlaskView {
       }
       bodyPoly.push(xR, yBR, xL, yBL);
 
-      g.beginFill(color.inner, 0.95);
+      g.lineStyle(0);
+      g.beginFill(color.hex, 0.95);
       g.drawPolygon(bodyPoly);
       g.endFill();
 
-      // 2. Luminous core
-      const coreL = -w * 0.34;
-      const coreR = w * 0.34;
-      const coreBL = isBottomChunk ? yBottomClamp : (Y_bot - coreL * slope);
-      const coreBR = isBottomChunk ? yBottomClamp : (Y_bot - coreR * slope);
-
-      const coreTopPoints = [];
-      for (let p of topCurvePoints) {
-        if (p.x >= coreL && p.x <= coreR) {
-          coreTopPoints.push(p.x, p.y);
-        }
-      }
-
-      const corePoly = [];
-      for (let i = 0; i < coreTopPoints.length; i += 2) {
-        corePoly.push(coreTopPoints[i], coreTopPoints[i + 1]);
-      }
-      corePoly.push(coreR, coreBR, coreL, coreBL);
-
-      g.beginFill(color.hex, 0.85);
-      g.drawPolygon(corePoly);
-      g.endFill();
-
-      // 3. Subtle boundary line between DIFFERENT colors
+      // 2. Subtle boundary line between DIFFERENT colors
       if (c < chunks.length - 1) {
-        g.lineStyle(1, color.glow, 0.25);
+        g.lineStyle(1, 0x000000, 0.15);
         g.moveTo(xL, Y_top - xL * slope);
         g.lineTo(xR, Y_top - xR * slope);
       }
 
-      // 4. Surface meniscus line on top-most fluid layer
+      // 3. Surface meniscus line on top-most fluid layer when pouring
       if (isTopChunk && isTilted) {
         g.lineStyle(2.5, 0xffffff, 0.75);
         g.moveTo(xL, Y_top - xL * slope);
@@ -1088,24 +1066,47 @@ class FlaskView {
       }
     }
 
-    // --- VELVET GLASS SHEEN (one unified strip over all liquid, auto-clipped by mask) ---
-    // Drawn after all chunks so it spans full liquid height regardless of color count.
-    // Empty flask → chunks.length === 0 → this block is skipped → no sheen on empty flask.
+    // --- UNIFIED SEAMLESS VELVET GLASS SHEEN OVERLAY (AUTOMATICALLY CLIPPED BY FLUID MASK) ---
+    // Renders ONE continuous, perfectly uniform, velvet highlight stripe over ALL liquid layers!
     if (chunks.length > 0 && totalNominalH > 0) {
-      const hL = -w * 0.40;
-      const hR = -w * 0.20;
-      const bigY = yBottomClamp;       // deep bottom (mask clips it)
-      const topY  = topSurfaceY - 4;  // slightly above wave top
+      const topChunkPoints = [];
+      const waveTime = (this.engine ? (this.engine.time || performance.now() * 0.003) : 0);
+      const isRestingWave = (!isTilted && !this.isReceiving && !this.isCapped);
 
-      // Layer 1 – wide whisper-soft glow
+      const hL = -w * 0.36;
+      const hR = -w * 0.18;
+      const step = 3;
+
+      for (let x = hL; x <= hR; x += step) {
+        const wave = isRestingWave ? Math.sin(waveTime * 3.5 + x * 0.18) * 1.8 : 0;
+        topChunkPoints.push(x, topSurfaceY - x * slope + wave);
+      }
+
+      const sheenPoly = [];
+      for (let i = 0; i < topChunkPoints.length; i += 2) {
+        sheenPoly.push(topChunkPoints[i], topChunkPoints[i + 1]);
+      }
+      // Bottom clamp into rounded glass base
+      sheenPoly.push(hR, yBottomClamp, hL, yBottomClamp);
+
+      // Velvet soft glass highlight (uniform 18% white sheen)
       g.lineStyle(0);
-      g.beginFill(0xffffff, 0.07);
-      g.drawRect(hL, topY, hR - hL, bigY - topY);
+      g.beginFill(0xffffff, 0.18);
+      g.drawPolygon(sheenPoly);
       g.endFill();
 
-      // Layer 2 – narrower brighter velvet core
-      g.beginFill(0xffffff, 0.10);
-      g.drawRect(-w * 0.36, topY, w * 0.10, bigY - topY);
+      // Subtle inner bright core streak (uniform 12% white inner core)
+      const corePoly = [];
+      const cL = -w * 0.32;
+      const cR = -w * 0.24;
+      for (let x = cL; x <= cR; x += step) {
+        const wave = isRestingWave ? Math.sin(waveTime * 3.5 + x * 0.18) * 1.8 : 0;
+        corePoly.push(x, topSurfaceY - x * slope + wave);
+      }
+      corePoly.push(cR, yBottomClamp, cL, yBottomClamp);
+
+      g.beginFill(0xffffff, 0.12);
+      g.drawPolygon(corePoly);
       g.endFill();
     }
   }
