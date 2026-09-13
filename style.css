@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v52)
+   Potion Master: Wizard Sort - Style & Layout (v53)
    ========================================================================== */
 
 * {
@@ -380,19 +380,19 @@ body {
 /* Seamless SVG Browser Tab Contour (for Map tab) */
 .dock-border-svg {
   position: absolute;
-  top: -55px;
+  top: -45px;
   left: 0;
   width: 100%;
-  height: 130px;
+  height: 120px;
   pointer-events: none;
   z-index: 29;
-  filter: drop-shadow(0 -6px 16px rgba(255, 215, 0, 0.35));
+  filter: drop-shadow(0 -3px 8px rgba(0, 0, 0, 0.5));
 }
 
 /* Integrated Quick-Play Button inside Browser Tab Dome */
 .quick-play-btn {
   position: absolute;
-  top: -40px;
+  top: -38px;
   left: 50%;
   transform: translateX(-50%);
   height: 48px;
@@ -439,15 +439,15 @@ body {
 
 .dock-tab {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: #9a8bb0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  padding: 6px 16px;
-  border-radius: 12px;
+  padding: 5px 12px;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 
@@ -465,11 +465,13 @@ body {
 
 .dock-tab.active {
   color: #ffd700;
-  background: rgba(255, 215, 0, 0.1);
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 8px;
 }
 .dock-tab.active .dock-icon {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+  transform: scale(1.05);
+  filter: none;
 }
 
 /* ==========================================================================
