@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v58)
+   Potion Master: Wizard Sort - Style & Layout (v59)
    ========================================================================== */
 
 * {
@@ -453,14 +453,16 @@ body {
   left: 50%;
   transform: translateX(-50%);
   height: 48px;
-  padding: 0 26px;
+  max-width: 80%;
+  white-space: nowrap;
+  padding: 0 clamp(16px, 5vw, 26px);
   background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
   border: 2px solid #fff;
   border-radius: 24px;
   color: #140e22;
   font-family: 'Cinzel', serif;
   font-weight: 800;
-  font-size: 15px;
+  font-size: clamp(13px, 3.5vw, 15px);
   letter-spacing: 1px;
   display: flex;
   align-items: center;
