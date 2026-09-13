@@ -1,4 +1,4 @@
-const GAME_VERSION = "v37";
+const GAME_VERSION = "v38";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -1309,9 +1309,9 @@ class FlaskView {
         const nx = -dy / len;
         const ny = dx / len;
 
-        // Natural tapering: thicker at spout lip, slender at impact point
-        const wOuter = 5.2 * (1 - t * 0.52);
-        const wCore = 2.8 * (1 - t * 0.52);
+        // Natural tapering: elegant at spout lip (3.6px), slender at impact point (1.8px)
+        const wOuter = 3.6 * (1 - t * 0.50);
+        const wCore = 1.9 * (1 - t * 0.50);
 
         outerLeft.push(px + nx * wOuter, py + ny * wOuter);
         outerRight.unshift(px - nx * wOuter, py - ny * wOuter);
@@ -1333,7 +1333,7 @@ class FlaskView {
       streamGfx.endFill();
 
       // 3. Central specular reflection streak
-      streamGfx.lineStyle(1.6, 0xffffff, 0.9);
+      streamGfx.lineStyle(1.1, 0xffffff, 0.9);
       streamGfx.moveTo(P0.x, P0.y);
       streamGfx.bezierCurveTo(P1.x, P1.y, P2.x, P2.y, P3.x, P3.y);
 
