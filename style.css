@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Potion Master: Wizard Sort - Style & Layout (v51)
+   Potion Master: Wizard Sort - Style & Layout (v52)
    ========================================================================== */
 
 * {
@@ -380,10 +380,10 @@ body {
 /* Seamless SVG Browser Tab Contour (for Map tab) */
 .dock-border-svg {
   position: absolute;
-  top: -35px;
+  top: -55px;
   left: 0;
   width: 100%;
-  height: 110px;
+  height: 130px;
   pointer-events: none;
   z-index: 29;
   filter: drop-shadow(0 -6px 16px rgba(255, 215, 0, 0.35));
@@ -392,7 +392,7 @@ body {
 /* Integrated Quick-Play Button inside Browser Tab Dome */
 .quick-play-btn {
   position: absolute;
-  top: -42px;
+  top: -40px;
   left: 50%;
   transform: translateX(-50%);
   height: 48px;
