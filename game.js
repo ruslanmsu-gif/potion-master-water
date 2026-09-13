@@ -1,4 +1,4 @@
-const GAME_VERSION = "v43";
+const GAME_VERSION = "v45";
 
 const PALETTE = [
   { id: 0, name: "Ruby Red",      hex: 0xff1744, inner: 0xc50024, glow: 0xff8a80, sparkles: 0xffd54f },
@@ -17,12 +17,15 @@ class GameEngine {
   constructor() {
     this.container = document.getElementById("canvas-container");
     this.currentLevel = 1;
+    this.completedLevelsCount = 0;
+    this.activeTab = "map"; // "stats" | "map" | "collection"
     this.flasks = [];
     this.selectedFlask = null;
     this.isBusy = false;
     this.undoStack = [];
 
     this.initPixi();
+    this.initMainScreen();
     this.bindUI();
   }
 
@@ -386,21 +389,231 @@ class GameEngine {
     }
   }
 
+  initMainScreen() {
+    this.renderSagaNodes();
+    this.populateCollectionGrid();
+
+    // Scroll to bottom (Chapter 1) on load
+    const sagaContainer = document.getElementById("saga-map-container");
+    if (sagaContainer) {
+      setTimeout(() => {
+        sagaContainer.scrollTop = sagaContainer.scrollHeight;
+      }, 100);
+    }
+
+    this.updateQuickPlayBtn();
+  }
+
+  renderSagaNodes() {
+    const list = document.getElementById("saga-nodes-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    // Exact Bezier curve node coordinates (Bottom-to-Top: Chapter 1 at y=1500, Chapter 10 at y=100)
+    const nodeCoords = [
+      { chapter: 1,  x: 200, y: 1500, title: "Основы зельеварения" },
+      { chapter: 2,  x: 300, y: 1340, title: "Заколдованный лес" },
+      { chapter: 3,  x: 200, y: 1180, title: "Первые травы" },
+      { chapter: 4,  x: 100, y: 1020, title: "Подземелье Снейпа" },
+      { chapter: 5,  x: 200, y: 860,  title: "Пламенный Искровит" },
+      { chapter: 6,  x: 300, y: 700,  title: "Тайные пропорции" },
+      { chapter: 7,  x: 200, y: 540,  title: "Академия Магии" },
+      { chapter: 8,  x: 100, y: 380,  title: "Ночные настойки" },
+      { chapter: 9,  x: 200, y: 220,  title: "Высшая Алхимия" },
+      { chapter: 10, x: 300, y: 100,  title: "Magnum Opus" }
+    ];
+
+    // Ensure path SVG d attribute matches exact node coordinates
+    const pathEl = document.getElementById("saga-path-line");
+    if (pathEl) {
+      pathEl.setAttribute("d", "M 200,1500 C 260,1460 300,1400 300,1340 C 300,1280 260,1220 200,1180 C 140,1140 100,1080 100,1020 C 100,960 140,900 200,860 C 260,820 300,760 300,700 C 300,640 260,580 200,540 C 140,500 100,440 100,380 C 100,320 140,260 200,220 C 260,180 300,140 300,100");
+    }
+
+    const currentChapter = Math.ceil(this.currentLevel / 50) || 1;
+
+    nodeCoords.forEach(node => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "saga-node-wrapper";
+      wrapper.style.left = `${node.x}px`;
+      wrapper.style.top = `${node.y}px`;
+
+      let stateClass = "locked-node";
+      if (node.chapter < currentChapter) {
+        stateClass = "completed-node";
+      } else if (node.chapter === currentChapter) {
+        stateClass = "current-node";
+      }
+
+      wrapper.classList.add(stateClass);
+
+      const startLvl = (node.chapter - 1) * 50 + 1;
+      const endLvl = node.chapter * 50;
+
+      const icon = stateClass === "completed-node" ? "✨" : (stateClass === "current-node" ? "🧪" : "🔒");
+
+      wrapper.innerHTML = `
+        <button class="saga-node-btn" data-chapter="${node.chapter}" data-start="${startLvl}">
+          <span class="node-number">${icon} ${node.chapter}</span>
+          <span class="node-range">${startLvl}-${endLvl}</span>
+        </button>
+        <div class="node-title-badge">${node.title}</div>
+      `;
+
+      wrapper.querySelector(".saga-node-btn").addEventListener("click", () => {
+        if (stateClass !== "locked-node") {
+          this.loadLevel(startLvl);
+          this.showGameplayScreen();
+        }
+      });
+
+      list.appendChild(wrapper);
+    });
+  }
+
+  updateQuickPlayBtn() {
+    const textEl = document.getElementById("quick-play-text");
+    if (textEl) {
+      textEl.textContent = `УРОВЕНЬ ${this.currentLevel}`;
+    }
+  }
+
+  switchTab(tabId) {
+    this.activeTab = tabId;
+
+    document.querySelectorAll(".dock-tab").forEach(tab => tab.classList.remove("active"));
+    const activeTabBtn = document.getElementById(`tab-${tabId}`);
+    if (activeTabBtn) activeTabBtn.classList.add("active");
+
+    const quickBtn = document.getElementById("quick-play-btn");
+
+    if (tabId === "map") {
+      if (quickBtn) quickBtn.style.display = "flex";
+      this.closeModal("stats-modal");
+      this.closeModal("collection-modal");
+    } else if (tabId === "stats") {
+      if (quickBtn) quickBtn.style.display = "none";
+      this.openModal("stats-modal");
+      this.closeModal("collection-modal");
+    } else if (tabId === "collection") {
+      if (quickBtn) quickBtn.style.display = "none";
+      this.openModal("collection-modal");
+      this.closeModal("stats-modal");
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add("hidden");
+  }
+
+  showGameplayScreen() {
+    document.getElementById("main-screen")?.classList.remove("active-screen");
+    document.getElementById("main-screen")?.classList.add("hidden-screen");
+
+    document.getElementById("game-screen")?.classList.remove("hidden-screen");
+    document.getElementById("game-screen")?.classList.add("active-screen");
+
+    const quickBtn = document.getElementById("quick-play-btn");
+    if (quickBtn) quickBtn.style.display = "none";
+  }
+
+  showMainScreen() {
+    document.getElementById("game-screen")?.classList.remove("active-screen");
+    document.getElementById("game-screen")?.classList.add("hidden-screen");
+
+    document.getElementById("main-screen")?.classList.remove("hidden-screen");
+    document.getElementById("main-screen")?.classList.add("active-screen");
+
+    this.switchTab("map");
+    this.renderSagaNodes();
+  }
+
+  populateCollectionGrid() {
+    const grid = document.getElementById("collection-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const items = [
+      { name: "Слеза Феникса", icon: "🔴", unlocked: true },
+      { name: "Сок Мандрагоры", icon: "🟢", unlocked: true },
+      { name: "Лунный Мороз", icon: "🔵", unlocked: true },
+      { name: "Пламя Дракона", icon: "🟠", unlocked: false },
+      { name: "Туман Теней", icon: "🟣", unlocked: false },
+      { name: "Эликсир Удачи", icon: "🟡", unlocked: false }
+    ];
+
+    items.forEach(item => {
+      const el = document.createElement("div");
+      el.className = `collection-item ${item.unlocked ? '' : 'locked'}`;
+      el.innerHTML = `
+        <span class="collection-icon">${item.icon}</span>
+        <span class="collection-name">${item.name}</span>
+      `;
+      grid.appendChild(el);
+    });
+  }
+
   bindUI() {
+    // Bottom Dock navigation
+    document.getElementById("tab-stats")?.addEventListener("click", () => this.switchTab("stats"));
+    document.getElementById("tab-map")?.addEventListener("click", () => this.switchTab("map"));
+    document.getElementById("tab-collection")?.addEventListener("click", () => this.switchTab("collection"));
+
+    // Quick Play floating button
+    document.getElementById("quick-play-btn")?.addEventListener("click", () => {
+      this.loadLevel(this.currentLevel);
+      this.showGameplayScreen();
+    });
+
+    // Back to map button in game header
+    document.getElementById("btn-back-to-map")?.addEventListener("click", () => {
+      this.showMainScreen();
+    });
+
+    // Modal close buttons
+    document.getElementById("btn-close-stats")?.addEventListener("click", () => {
+      this.switchTab("map");
+    });
+    document.getElementById("btn-close-collection")?.addEventListener("click", () => {
+      this.switchTab("map");
+    });
+
+    // Stats sub-tabs
+    document.querySelectorAll(".stats-tab").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".stats-tab").forEach(t => t.classList.remove("active"));
+        e.target.classList.add("active");
+      });
+    });
+
     document.getElementById("btn-restart").addEventListener("click", () => this.restart());
     document.getElementById("btn-undo").addEventListener("click", () => this.undo());
     document.getElementById("btn-next-level").addEventListener("click", () => {
       document.getElementById("win-modal").classList.add("hidden");
-      this.loadLevel(this.currentLevel + 1);
+      this.currentLevel++;
+      this.completedLevelsCount++;
+      const completedStat = document.getElementById("stat-completed-levels");
+      if (completedStat) completedStat.textContent = this.completedLevelsCount;
+      this.updateQuickPlayBtn();
+      this.loadLevel(this.currentLevel);
     });
 
     // Developer Admin Quick-Skip controls
     document.getElementById("btn-dev-next")?.addEventListener("click", () => {
-      this.loadLevel(this.currentLevel + 1);
+      this.currentLevel++;
+      this.updateQuickPlayBtn();
+      this.loadLevel(this.currentLevel);
     });
     document.getElementById("btn-dev-prev")?.addEventListener("click", () => {
       if (this.currentLevel > 1) {
-        this.loadLevel(this.currentLevel - 1);
+        this.currentLevel--;
+        this.updateQuickPlayBtn();
+        this.loadLevel(this.currentLevel);
       }
     });
   }
