@@ -101,14 +101,15 @@ const PRESET_LEVELS = [
             []
         ]
     },
-    // Уровень 3: Ввод 3-го цвета (Emerald)
+    // Уровень 3: 5 колб, 3 цвета, средняя колба пустая (легкая сборка)
     {
         title: 'Урок 3: Первые травы',
         chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['ruby', 'emerald', 'sapphire', 'ruby'],
-            ['sapphire', 'emerald', 'ruby', 'emerald'],
-            ['emerald', 'sapphire', 'sapphire', 'ruby'],
+            ['ruby', 'ruby', 'ruby', 'sapphire'],
+            ['sapphire', 'sapphire', 'sapphire', 'emerald'],
+            [],
+            ['emerald', 'emerald', 'emerald', 'ruby'],
             []
         ]
     },
