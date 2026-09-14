@@ -71,6 +71,15 @@ const POTION_PALETTE = {
         bottomColor: '#a4133c',
         glowColor: 'rgba(255, 77, 109, 0.45)',
         bubbleColor: 'rgba(255, 200, 215, 0.7)'
+    },
+    violet: {
+        id: 'violet',
+        name: 'Shadow Mist',
+        ruName: 'Туман Теней',
+        topColor: '#7c4dff',
+        bottomColor: '#4527a0',
+        glowColor: 'rgba(124, 77, 255, 0.45)',
+        bubbleColor: 'rgba(210, 180, 255, 0.7)'
     }
 };
 
@@ -113,14 +122,21 @@ const PRESET_LEVELS = [
             []
         ]
     },
-    // Уровень 4: 4 колбы, 3 цвета
+    // Уровень 4: 11 колб (6 сверху, 5 снизу), 9 цветов, 2 пустые колбы
     {
-        title: 'Урок 4: Смешение в подземелье',
+        title: 'Урок 4: Лабиринт Ингредиентов',
         chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['emerald', 'ruby', 'sapphire', 'emerald'],
-            ['ruby', 'sapphire', 'ruby', 'emerald'],
-            ['sapphire', 'emerald', 'sapphire', 'ruby'],
+            ['ruby', 'sapphire', 'emerald', 'amber'],
+            ['amethyst', 'gold', 'cyan', 'rose'],
+            ['violet', 'ruby', 'sapphire', 'emerald'],
+            ['amber', 'amethyst', 'gold', 'cyan'],
+            ['rose', 'violet', 'ruby', 'sapphire'],
+            [],
+            ['emerald', 'amber', 'amethyst', 'gold'],
+            ['cyan', 'rose', 'violet', 'ruby'],
+            ['sapphire', 'emerald', 'amber', 'amethyst'],
+            ['gold', 'cyan', 'rose', 'violet'],
             []
         ]
     },

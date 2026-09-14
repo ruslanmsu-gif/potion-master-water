@@ -1,4 +1,4 @@
-const GAME_VERSION = "v67";
+const GAME_VERSION = "v68";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -47,7 +47,8 @@ const PALETTE = [
   { id: 4, name: "Amethyst",      hex: 0xd500f9, inner: 0x8800cc, glow: 0xea80fc, sparkles: 0xff80ab },
   { id: 5, name: "Cyan Teal",     hex: 0x00e5ff, inner: 0x0088cc, glow: 0x84ffff, sparkles: 0xffffff },
   { id: 6, name: "Orange Magma",  hex: 0xff6d00, inner: 0xbb2200, glow: 0xffab40, sparkles: 0xffeb3b },
-  { id: 7, name: "Rose Pink",     hex: 0xff4081, inner: 0xa80045, glow: 0xff80ab, sparkles: 0xffd1dc }
+  { id: 7, name: "Rose Pink",     hex: 0xff4081, inner: 0xa80045, glow: 0xff80ab, sparkles: 0xffd1dc },
+  { id: 8, name: "Obsidian Violet", hex: 0x7c4dff, inner: 0x536dfe, glow: 0xb388ff, sparkles: 0xe040fb }
 ];
 
 const FLASK_CAP = 4;
@@ -179,7 +180,8 @@ class GameEngine {
       amethyst: 4,
       gold: 5,
       cyan: 6,
-      rose: 7
+      rose: 7,
+      violet: 8
     };
 
     if (typeof PRESET_LEVELS !== 'undefined' && level <= PRESET_LEVELS.length) {
@@ -288,10 +290,13 @@ class GameEngine {
       const rowStartX = Math.round((w - (rowCount - 1) * spacingX) / 2);
 
       const targetX = rowStartX + col * spacingX;
-      const targetY = startY + row * spacingY;
+      const flask = this.flasks[i];
+      const isMini = flask.maxCapacity === 1;
+      const curH = isMini ? Math.round((flaskHeight - 26) / 4 * 1 + 26) : flaskHeight;
+      const curY = targetY + (flaskHeight - curH);
 
-      this.flasks[i].setSize(flaskWidth, flaskHeight);
-      this.flasks[i].setBasePosition(targetX, targetY);
+      flask.setSize(flaskWidth, curH);
+      flask.setBasePosition(targetX, curY);
     }
 
     this.updateTutorialOverlay();
@@ -812,6 +817,7 @@ class GameEngine {
 
     document.getElementById("btn-restart").addEventListener("click", () => this.restart());
     document.getElementById("btn-undo").addEventListener("click", () => this.undo());
+    document.getElementById("btn-add-flask")?.addEventListener("click", () => this.addMiniFlask());
     document.getElementById("btn-next-level").addEventListener("click", () => {
       document.getElementById("win-modal").classList.add("hidden");
       this.currentLevel++;
@@ -835,6 +841,23 @@ class GameEngine {
         this.loadLevel(this.currentLevel);
       }
     });
+  addMiniFlask() {
+    if (this.isBusy) return;
+    const badge = document.querySelector("#btn-add-flask .badge-count");
+    let count = badge ? parseInt(badge.textContent) || 0 : 0;
+    if (count <= 0) return;
+    count--;
+    if (badge) badge.textContent = count;
+
+    const newIndex = this.flasks.length;
+    const newFlask = new FlaskView(this, newIndex, [], 1);
+    this.flasks.push(newFlask);
+    this.flasksLayer.addChild(newFlask.container);
+    this.positionFlasks();
+
+    if (window.soundEngine && typeof window.soundEngine.playPourStart === 'function') {
+      window.soundEngine.playPourStart();
+    }
   }
 }
 
@@ -842,10 +865,11 @@ class GameEngine {
  * High-End Realistic Glass Flask with Deep Fluid Stream Mechanics
  */
 class FlaskView {
-  constructor(engine, index, initialLayers) {
+  constructor(engine, index, initialLayers, maxCapacity = FLASK_CAP) {
     this.engine = engine;
     this.index = index;
     this.layers = [...initialLayers];
+    this.maxCapacity = maxCapacity;
 
     this.container = new PIXI.Container();
     this.container.eventMode = 'static';
@@ -926,7 +950,7 @@ class FlaskView {
   }
 
   getSurfaceY() {
-    const layerH = (this.height - 26) / FLASK_CAP;
+    const layerH = (this.height - 26) / this.maxCapacity;
     const bottomY = this.height - 8;
     return bottomY - this.layers.length * layerH - (this.corkDisplacement || 0);
   }
@@ -950,7 +974,7 @@ class FlaskView {
     if (this === target) return false;
     if (this.isCapped || target.isCapped) return false;
     if (this.layers.length === 0) return false;
-    if (target.layers.length >= FLASK_CAP) return false;
+    if (target.layers.length >= target.maxCapacity) return false;
     if (target.isMasterVessel) return true; // Master Vessel accepts any ingredient!
     if (target.layers.length === 0) return true;
     return this.topColor() === target.topColor();
@@ -958,20 +982,20 @@ class FlaskView {
 
   getAmountToPour(target) {
     const available = this.topColorCount();
-    const free = FLASK_CAP - target.layers.length;
+    const free = target.maxCapacity - target.layers.length;
     return Math.min(available, free);
   }
 
   isSolved() {
     if (this.isMasterVessel) return this.isCapped;
     if (this.layers.length === 0) return true;
-    if (this.layers.length < FLASK_CAP) return false;
+    if (this.layers.length < this.maxCapacity) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
 
   isCompletedFull() {
-    if (this.layers.length !== FLASK_CAP) return false;
+    if (this.layers.length !== this.maxCapacity) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
@@ -1364,7 +1388,7 @@ class FlaskView {
 
     const w = this.width;
     const h = this.height;
-    const layerH = (h - 26) / FLASK_CAP;
+    const layerH = (h - 26) / this.maxCapacity;
     const bottomY = h - 8;
 
     // --- 1. Merge adjacent same-color layers into unified chunks ---
