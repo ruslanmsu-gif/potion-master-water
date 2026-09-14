@@ -1,4 +1,4 @@
-const GAME_VERSION = "v71";
+const GAME_VERSION = "v72";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -995,13 +995,13 @@ class FlaskView {
   isSolved() {
     if (this.isMasterVessel) return this.isCapped;
     if (this.layers.length === 0) return true;
-    if (this.layers.length < this.maxCapacity) return false;
+    if (this.layers.length < FLASK_CAP) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
 
   isCompletedFull() {
-    if (this.layers.length !== this.maxCapacity) return false;
+    if (this.layers.length !== FLASK_CAP) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
