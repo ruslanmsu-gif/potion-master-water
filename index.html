@@ -26,7 +26,7 @@
         </div>
         <div class="header-center">
           <h1 class="app-title">POTION MASTER</h1>
-          <p class="app-sub">Wizard Sort (v64)</p>
+          <p class="app-sub">Wizard Sort (v65)</p>
         </div>
         <div class="header-right">
           <button id="btn-main-sound" class="icon-btn" title="Звук">🔊</button>
@@ -184,6 +184,23 @@
         </div>
       </header>
 
+      <!-- Top Gameplay Action Bar (Above Flasks, Below Header) -->
+      <div id="game-top-actions">
+        <button id="btn-restart" class="action-btn">
+          <span class="btn-icon">↺</span>
+          <span class="btn-text">Заново</span>
+        </button>
+        <button id="btn-undo" class="action-btn">
+          <span class="btn-icon">↶</span>
+          <span class="btn-text">Назад</span>
+        </button>
+        <button id="btn-add-flask" class="action-btn add-flask-btn">
+          <span class="btn-icon">🧪+</span>
+          <span class="btn-text">Колба</span>
+          <span class="badge-count">3</span>
+        </button>
+      </div>
+
       <div id="recipe-banner" class="hidden"></div>
 
       <main id="canvas-container">
@@ -201,22 +218,6 @@
           <span id="level-hint-text">Только зелья ОДИНАКОВОГО ЦВЕТА можно наливать друг на друга</span>
         </div>
       </main>
-
-      <footer id="game-footer">
-        <button id="btn-restart" class="action-btn">
-          <span class="btn-icon">↺</span>
-          <span class="btn-text">Заново</span>
-        </button>
-        <button id="btn-undo" class="action-btn">
-          <span class="btn-icon">↶</span>
-          <span class="btn-text">Назад</span>
-        </button>
-        <button id="btn-add-flask" class="action-btn add-flask-btn">
-          <span class="btn-icon">🧪+</span>
-          <span class="btn-text">Колба</span>
-          <span class="badge-count">3</span>
-        </button>
-      </footer>
     </div>
 
     <!-- =========================================================================
@@ -285,9 +286,9 @@
 
   </div>
 
-  <script src="levels.js?v=64"></script>
-  <script src="audio.js?v=64"></script>
-  <script src="game.js?v=64"></script>
+  <script src="levels.js?v=65"></script>
+  <script src="audio.js?v=65"></script>
+  <script src="game.js?v=65"></script>
 </body>
 </html>
 
