@@ -1,4 +1,4 @@
-const GAME_VERSION = "v70";
+const GAME_VERSION = "v71";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -290,6 +290,7 @@ class GameEngine {
       const rowStartX = Math.round((w - (rowCount - 1) * spacingX) / 2);
 
       const targetX = rowStartX + col * spacingX;
+      const targetY = startY + row * spacingY;
       const flask = this.flasks[i];
       const isMini = flask.maxCapacity === 1;
       const curH = isMini ? Math.round((flaskHeight - 26) / 4 * 1 + 26) : flaskHeight;
