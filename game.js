@@ -293,12 +293,30 @@ class GameEngine {
     const target = document.getElementById("tutorial-target");
     const finger = document.getElementById("tutorial-finger");
     const glow = document.getElementById("tutorial-glow");
-
-    if (!overlay || !banner || !target || !finger) return;
+    const staticCard = document.getElementById("level-hint-card");
+    const staticText = document.getElementById("level-hint-text");
 
     const preset = (typeof PRESET_LEVELS !== 'undefined' && this.currentLevel <= PRESET_LEVELS.length)
       ? PRESET_LEVELS[this.currentLevel - 1]
       : null;
+
+    // Static hint frame under flasks (e.g. Level 2 with showGuide: false)
+    if (preset && preset.showGuide === false) {
+      if (overlay) overlay.classList.add("hidden");
+      this.flasks.forEach(f => { f.isTutorialPulse = false; });
+
+      if (preset.hintText && staticCard && staticText) {
+        staticText.textContent = preset.hintText;
+        staticCard.classList.remove("hidden");
+      } else if (staticCard) {
+        staticCard.classList.add("hidden");
+      }
+      return;
+    }
+
+    if (staticCard) staticCard.classList.add("hidden");
+
+    if (!overlay || !banner || !target || !finger) return;
 
     if (!preset || !preset.hintText || this.isBusy) {
       overlay.classList.add("hidden");

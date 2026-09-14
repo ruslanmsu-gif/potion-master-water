@@ -649,6 +649,47 @@ body {
   50% { transform: translate(-50%, -64%) scale(1.18); }
 }
 
+/* Responsive Level Static Hint Frame Card (Under Flasks) */
+#level-hint-card {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90%, 360px);
+  background: linear-gradient(135deg, rgba(35, 22, 50, 0.95) 0%, rgba(16, 10, 26, 0.98) 100%);
+  border: 1.8px solid #ffd700;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(255, 215, 0, 0.18);
+  border-radius: 20px;
+  padding: 10px 18px;
+  text-align: center;
+  z-index: 20;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#level-hint-card.hidden {
+  display: none !important;
+  opacity: 0;
+}
+
+#level-hint-text {
+  font-family: 'Cinzel', 'MedievalSharp', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff9db;
+  line-height: 1.4;
+  letter-spacing: 0.4px;
+  display: block;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 380px) {
+  #level-hint-text {
+    font-size: 11.5px;
+    padding: 0 2px;
+  }
+}
+
 #canvas-container {
   flex: 1;
   width: 100%;

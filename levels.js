@@ -94,7 +94,7 @@ const PRESET_LEVELS = [
         title: 'Урок 2: Разделение стихий',
         chapter: 'Семестр 1: Основы зельеварения',
         hintText: 'Только зелья ОДИНАКОВОГО ЦВЕТА можно наливать друг на друга',
-        hintPosition: 'bottom',
+        showGuide: false,
         flasks: [
             ['ruby', 'sapphire', 'ruby', 'sapphire'],
             ['sapphire', 'ruby', 'sapphire', 'ruby'],
