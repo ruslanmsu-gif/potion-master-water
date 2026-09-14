@@ -1,4 +1,4 @@
-const GAME_VERSION = "v62";
+const GAME_VERSION = "v63";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -324,6 +324,12 @@ class GameEngine {
 
     overlay.classList.remove("hidden");
     banner.textContent = preset.hintText;
+
+    if (preset.hintPosition === 'bottom') {
+      banner.classList.add("hint-bottom");
+    } else {
+      banner.classList.remove("hint-bottom");
+    }
 
     const x = targetFlask.baseX;
     const centerY = targetFlask.baseY + targetFlask.height / 2;
