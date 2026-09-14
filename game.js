@@ -1,4 +1,4 @@
-const GAME_VERSION = "v72";
+const GAME_VERSION = "v73";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -292,8 +292,8 @@ class GameEngine {
       const targetX = rowStartX + col * spacingX;
       const targetY = startY + row * spacingY;
       const flask = this.flasks[i];
-      const isMini = flask.maxCapacity === 1;
-      const curH = isMini ? Math.round((flaskHeight - 26) / 4 * 1 + 26) : flaskHeight;
+      const capFraction = Math.min(1, flask.maxCapacity / FLASK_CAP);
+      const curH = Math.round((flaskHeight - 26) * capFraction + 26);
       const curY = targetY + (flaskHeight - curH);
 
       flask.setSize(flaskWidth, curH);
@@ -852,13 +852,22 @@ class GameEngine {
     const badge = document.querySelector("#btn-add-flask .badge-count");
     let count = badge ? parseInt(badge.textContent) || 0 : 0;
     if (count <= 0) return;
+
+    // Check if an incomplete booster flask (maxCapacity < 4) already exists
+    const existingIncomplete = this.flasks.find(f => f.maxCapacity < FLASK_CAP);
+
     count--;
     if (badge) badge.textContent = count;
 
-    const newIndex = this.flasks.length;
-    const newFlask = new FlaskView(this, newIndex, [], 1);
-    this.flasks.push(newFlask);
-    this.flasksLayer.addChild(newFlask.container);
+    if (existingIncomplete) {
+      existingIncomplete.maxCapacity++;
+    } else {
+      const newIndex = this.flasks.length;
+      const newFlask = new FlaskView(this, newIndex, [], 1);
+      this.flasks.push(newFlask);
+      this.flasksLayer.addChild(newFlask.container);
+    }
+
     this.positionFlasks();
 
     if (window.soundEngine && typeof window.soundEngine.playPourStart === 'function') {
