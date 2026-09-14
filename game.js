@@ -1,4 +1,4 @@
-const GAME_VERSION = "v69";
+const GAME_VERSION = "v70";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -575,12 +575,15 @@ class GameEngine {
     this.renderLeaderboard("all-time");
 
     // Scroll to bottom (Chapter 1) on load
-    const sagaContainer = document.getElementById("saga-map-container");
-    if (sagaContainer) {
-      setTimeout(() => {
-        sagaContainer.scrollTop = sagaContainer.scrollHeight;
-      }, 100);
-    }
+    const scrollToBottom = () => {
+      const sagaContainer = document.getElementById("saga-map-container");
+      if (sagaContainer) {
+        sagaContainer.scrollTop = 99999;
+      }
+    };
+    scrollToBottom();
+    setTimeout(scrollToBottom, 50);
+    setTimeout(scrollToBottom, 250);
 
     this.updateQuickPlayBtn();
   }
@@ -1979,9 +1982,17 @@ class FlaskView {
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  window.gameEngine = new GameEngine();
-});
+function initGameEngine() {
+  if (!window.gameEngine) {
+    window.gameEngine = new GameEngine();
+  }
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initGameEngine);
+} else {
+  initGameEngine();
+}
 
 
 
