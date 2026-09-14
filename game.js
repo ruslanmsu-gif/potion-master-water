@@ -1,4 +1,4 @@
-const GAME_VERSION = "v65";
+const GAME_VERSION = "v66";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -127,6 +127,16 @@ class GameEngine {
     const levelSub = document.getElementById("level-sub");
     if (levelSub) {
       levelSub.textContent = `Novice Alchemist (${GAME_VERSION})`;
+    }
+
+    // Hide top action buttons (Restart, Undo, Add Flask) ONLY on Level 1
+    const topActions = document.getElementById("game-top-actions");
+    if (topActions) {
+      if (levelNum === 1) {
+        topActions.classList.add("hidden");
+      } else {
+        topActions.classList.remove("hidden");
+      }
     }
 
     // Floating Parchment Recipe HUD Banner
