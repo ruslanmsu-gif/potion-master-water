@@ -841,6 +841,8 @@ class GameEngine {
         this.loadLevel(this.currentLevel);
       }
     });
+  }
+
   addMiniFlask() {
     if (this.isBusy) return;
     const badge = document.querySelector("#btn-add-flask .badge-count");
