@@ -1,4 +1,4 @@
-const GAME_VERSION = "v83";
+const GAME_VERSION = "v84";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -140,19 +140,14 @@ class GameEngine {
       }
     }
 
-    // Floating Parchment Recipe HUD Banner
-    let recipeBanner = document.getElementById("recipe-banner");
-    if (!recipeBanner) {
-      recipeBanner = document.createElement("div");
-      recipeBanner.id = "recipe-banner";
-      this.container.appendChild(recipeBanner);
-    }
-
+    // Glowing Info Button & Mechanic Instructions Modal for Recipe Levels
+    const btnInfo = document.getElementById("btn-level-info");
     if (this.currentRecipe) {
-      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Отсортируйте 6 цветов по колбам (0/6)`;
-      recipeBanner.classList.remove("hidden");
+      if (btnInfo) btnInfo.classList.remove("hidden");
+      this.openModal("mechanic-intro-modal");
     } else {
-      recipeBanner.classList.add("hidden");
+      if (btnInfo) btnInfo.classList.add("hidden");
+      this.closeModal("mechanic-intro-modal");
     }
 
     this.flasksLayer.removeChildren();
@@ -260,7 +255,7 @@ class GameEngine {
       const masterW = Math.round(masterH / 3.4);   // ~90px wide!
 
       const totalGridH = numRows * sideH + (numRows - 1) * (hasBoosters ? 14 : 22);
-      const gridTopY = Math.max(68, Math.round((h - totalGridH) / 2) - 10);
+      const gridTopY = Math.max(48, Math.round((h - totalGridH) / 2) - 20);
 
       const masterY = gridTopY + Math.round((2 * sideH + 22 - masterH) / 2);
 
@@ -523,29 +518,8 @@ class GameEngine {
       await from.pourInto(to, 1, colorId, this.streamLayer, this.splashLayer);
       from.layers = []; // Complete monochromatic side flask transfers its essence and empties
       from.drawLiquids();
-
-      const recipeBanner = document.getElementById("recipe-banner");
-      if (this.currentRecipe && recipeBanner) {
-        const count = to.layers.length;
-        const target = to.maxCapacity;
-        recipeBanner.innerHTML = `✨ <b>РИТУАЛ В ДЕЙСТВИИ:</b> Переливание эссенций (${count}/${target})`;
-      }
     } else {
       await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
-
-      if (this.currentRecipe) {
-        const recipeBanner = document.getElementById("recipe-banner");
-        if (recipeBanner) {
-          const masterCount = this.flasks[0] ? this.flasks[0].layers.length : 0;
-          const fullSideCount = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
-          const totalCompleted = masterCount + fullSideCount;
-          if (totalCompleted < 6) {
-            recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Отсортируйте 6 цветов по колбам (${totalCompleted}/6)`;
-          } else {
-            recipeBanner.innerHTML = `✨ <b>РИТУАЛ ОТКРЫТ!</b> Перелейте эссенции в Главную Колбу (${masterCount}/6)`;
-          }
-        }
-      }
     }
 
     // If target is master vessel and reached target capacity: synthesize potion!
@@ -631,15 +605,6 @@ class GameEngine {
 
     fromFlask.drawLiquids();
     toFlask.drawLiquids();
-
-    if (this.currentRecipe) {
-      const recipeBanner = document.getElementById("recipe-banner");
-      if (recipeBanner) {
-        const count = this.flasks[0].layers.length;
-        const target = this.flasks[0].maxCapacity || 6;
-        recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${target} эссенций в Главную Колбу (${count}/${target})`;
-      }
-    }
   }
 
   restart() {
@@ -945,6 +910,13 @@ class GameEngine {
         });
         this.renderLeaderboard(subtab);
       });
+    });
+
+    document.getElementById("btn-level-info")?.addEventListener("click", () => {
+      this.openModal("mechanic-intro-modal");
+    });
+    document.getElementById("btn-close-mechanic-intro")?.addEventListener("click", () => {
+      this.closeModal("mechanic-intro-modal");
     });
 
     document.getElementById("btn-restart").addEventListener("click", () => this.restart());

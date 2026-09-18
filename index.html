@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>Potion Master: Wizard Sort</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
-  <link rel="stylesheet" href="style.css?v=83">
+  <link rel="stylesheet" href="style.css?v=84">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=MedievalSharp&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
         </div>
         <div class="header-center">
           <h1 class="app-title">POTION MASTER</h1>
-          <p class="app-sub">Wizard Sort (v83)</p>
+          <p class="app-sub">Wizard Sort (v84)</p>
         </div>
         <div class="header-right">
           <button id="btn-main-sound" class="icon-btn" title="Звук">🔊</button>
@@ -189,22 +189,20 @@
 
       <!-- Top Gameplay Action Bar (Above Flasks, Below Header) -->
       <div id="game-top-actions">
-        <button id="btn-restart" class="action-btn">
+        <button id="btn-restart" class="action-btn" title="Заново">
           <span class="btn-icon">↺</span>
-          <span class="btn-text">Заново</span>
         </button>
-        <button id="btn-undo" class="action-btn">
+        <button id="btn-undo" class="action-btn" title="Назад">
           <span class="btn-icon">↶</span>
-          <span class="btn-text">Назад</span>
         </button>
-        <button id="btn-add-flask" class="action-btn add-flask-btn">
+        <button id="btn-add-flask" class="action-btn add-flask-btn" title="Добавить колбу">
           <span class="btn-icon">🧪+</span>
-          <span class="btn-text">Колба</span>
-          <span class="badge-count">1000</span>
+          <span class="badge-count">996</span>
+        </button>
+        <button id="btn-level-info" class="action-btn glow-btn-info hidden" title="Инструкция к уровню">
+          <span class="btn-icon">❗</span>
         </button>
       </div>
-
-      <div id="recipe-banner" class="hidden"></div>
 
       <main id="canvas-container">
         <!-- WebGL Canvas rendered by Pixi.js -->
@@ -287,11 +285,39 @@
       </div>
     </div>
 
+    <!-- 4. Mechanic Intro & Recipe Instructions Modal -->
+    <div id="mechanic-intro-modal" class="modal hidden">
+      <div class="modal-content recipe-intro-card">
+        <div class="intro-header-icon">📜</div>
+        <h2 id="mechanic-intro-title">РИТУАЛ АЛХИМИИ</h2>
+        <div class="recipe-instructions-body">
+          <p class="intro-main-text">
+            <b>Инструкция к уровню</b>
+          </p>
+          <div class="intro-steps-list">
+            <div class="intro-step">
+              <span class="step-num">1</span>
+              <span>Отсортируйте все <b>6 цветов</b> по боковым колбам.</span>
+            </div>
+            <div class="intro-step">
+              <span class="step-num">2</span>
+              <span>После сборки цветов <b>Главная Колба</b> разблокируется.</span>
+            </div>
+            <div class="intro-step">
+              <span class="step-num">3</span>
+              <span>Перелейте эссенции в Главную Колбу для синтеза зелья!</span>
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-mechanic-intro" class="primary-btn">ПРОДОЛЖИТЬ</button>
+      </div>
+    </div>
+
   </div>
 
-  <script src="levels.js?v=83"></script>
-  <script src="audio.js?v=83"></script>
-  <script src="game.js?v=83"></script>
+  <script src="levels.js?v=84"></script>
+  <script src="audio.js?v=84"></script>
+  <script src="game.js?v=84"></script>
 </body>
 </html>
 
