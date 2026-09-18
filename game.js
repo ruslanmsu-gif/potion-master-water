@@ -1,4 +1,4 @@
-const GAME_VERSION = "v84";
+const GAME_VERSION = "v85";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -247,17 +247,20 @@ class GameEngine {
       const sideW = flaskWidth;   // Exactly 42px - SAME as Levels 1-4!
       const sideH = flaskHeight;  // Exactly 143px - SAME as Levels 1-4!
 
+      const ROW_GAP = 22; // Equal vertical gap between ALL rows
       const gapX = sideW + 14;
-      const gapY = sideH + (hasBoosters ? 14 : 22);
+      const gapY = sideH + ROW_GAP;
 
       // Master Vessel height equals 2 rows of standard flasks + gap
-      const masterH = Math.round(2 * sideH + 22); // ~308px high!
+      const masterH = Math.round(2 * sideH + ROW_GAP); // ~308px high!
       const masterW = Math.round(masterH / 3.4);   // ~90px wide!
 
-      const totalGridH = numRows * sideH + (numRows - 1) * (hasBoosters ? 14 : 22);
-      const gridTopY = Math.max(48, Math.round((h - totalGridH) / 2) - 20);
+      const totalGridH = numRows * sideH + (numRows - 1) * ROW_GAP;
+      const gridTopY = hasBoosters
+        ? Math.round((h - totalGridH) / 2) + 20
+        : Math.max(52, Math.round((h - totalGridH) / 2) - 10);
 
-      const masterY = gridTopY + Math.round((2 * sideH + 22 - masterH) / 2);
+      const masterY = gridTopY + Math.round((2 * sideH + ROW_GAP - masterH) / 2);
 
       // Position Master Crucible (Flask 0) in center
       this.flasks[0].setSize(masterW, masterH);
