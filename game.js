@@ -1,4 +1,4 @@
-const GAME_VERSION = "v80";
+const GAME_VERSION = "v81";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -235,32 +235,42 @@ class GameEngine {
     const h = this.app.screen.height;
     const total = this.flasks.length;
 
+    // --- Standard Flask Dimensions (Unified across ALL levels) ---
+    const MAX_COLS = 6;
+    const GAP = 22;      // visible gap between flasks
+    const RATIO = 3.4;   // height = width * RATIO
+    const SIDE_PAD = 24; // total horizontal padding
+
+    const flaskWidth = Math.min(42, Math.floor((w - SIDE_PAD - (MAX_COLS - 1) * GAP) / MAX_COLS));
+    const flaskHeight = Math.round(flaskWidth * RATIO);
+
     if (this.currentRecipe) {
-      // 🏰 Recipe Boss Level 5 Layout: Central Master Crucible in center, 4 side flasks on left, 4 on right
+      // 🏰 Recipe Boss Level 5 Layout: Standard side flasks (42x143) & Lengthened Central Master Vessel
       const hasBoosters = total > 9;
       const numRows = hasBoosters ? 3 : 2;
 
-      const masterW = Math.min(72, Math.floor(w * 0.22));
-      const masterH = Math.round(masterW * 3.4);
+      const sideW = flaskWidth;   // Exactly 42px - SAME as Levels 1-4!
+      const sideH = flaskHeight;  // Exactly 143px - SAME as Levels 1-4!
 
-      const leftSpace = w / 2 - masterW / 2 - 12;
-      const sideW = Math.min(36, Math.floor((leftSpace - 14) / 2));
-      const sideH = Math.round(sideW * 3.4);
-      const gapX = sideW + 8;
-      const gapY = sideH + (hasBoosters ? 12 : 20);
+      const gapX = sideW + 14;
+      const gapY = sideH + (hasBoosters ? 14 : 22);
 
-      const totalGridH = numRows * sideH + (numRows - 1) * (hasBoosters ? 12 : 20);
+      // Master Vessel height equals 2 rows of standard flasks + gap
+      const masterH = Math.round(2 * sideH + 22); // ~308px high!
+      const masterW = Math.round(masterH / 3.4);   // ~90px wide!
+
+      const totalGridH = numRows * sideH + (numRows - 1) * (hasBoosters ? 14 : 22);
       const gridTopY = Math.max(68, Math.round((h - totalGridH) / 2) - 10);
 
-      const masterY = gridTopY + Math.round((2 * sideH + (hasBoosters ? 12 : 20) - masterH) / 2);
+      const masterY = gridTopY + Math.round((2 * sideH + 22 - masterH) / 2);
 
       // Position Master Crucible (Flask 0) in center
       this.flasks[0].setSize(masterW, masterH);
       this.flasks[0].setBasePosition(w / 2, masterY);
 
       if (total >= 9) {
-        const leftCenterX = (w / 2 - masterW / 2) / 2;
-        const rightCenterX = w - leftCenterX;
+        const leftCenterX = Math.round((w / 2 - masterW / 2) / 2);
+        const rightCenterX = Math.round(w - leftCenterX);
 
         // Left Side Flasks: Flasks 1, 2 (top), Flasks 3, 4 (bot)
         const leftCoords = [
@@ -312,8 +322,8 @@ class GameEngine {
         }
       } else {
         const sideCount = total - 1;
-        const sideW = Math.min(44, (w - 30) / sideCount - 10);
-        const sideH = Math.round(sideW * 3.4);
+        const sideW = flaskWidth;
+        const sideH = flaskHeight;
         const spacingX = sideW + 10;
         const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
         const sideY = gridTopY + masterH + 26;
@@ -332,14 +342,6 @@ class GameEngine {
     }
 
     // --- Normal levels: always max 6 per row, guaranteed to fit any screen ---
-    const MAX_COLS = 6;
-    const GAP = 22;      // visible gap between flasks — comfortable breathing room
-    const RATIO = 3.4;   // height = width * RATIO (elegant slender flask)
-    const SIDE_PAD = 24; // total horizontal padding
-
-    // Flask width guaranteed to fit MAX_COLS on any device with proper gaps
-    const flaskWidth = Math.min(42, Math.floor((w - SIDE_PAD - (MAX_COLS - 1) * GAP) / MAX_COLS));
-    const flaskHeight = Math.round(flaskWidth * RATIO);
     const spacingX = flaskWidth + GAP;
 
     // Grid layout
