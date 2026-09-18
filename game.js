@@ -1,4 +1,4 @@
-const GAME_VERSION = "v81";
+const GAME_VERSION = "v82";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -1887,7 +1887,7 @@ class FlaskView {
     const topColor = PALETTE[this.topColor()];
     const w = this.width;
     const h = this.height;
-    const layerH = (h - 24) / this.maxCapacity;
+    const layerH = (h - 26) / this.maxCapacity;
     for (const s of this.sparkles) {
       s.y -= s.speed;
       if (s.y < 0) s.y = 1;
@@ -1954,7 +1954,7 @@ class FlaskView {
     }
 
     // Continuous physical tilt angle function based on fluid level
-    const getTiltForLayers = (L) => 0.72 + (FLASK_CAP - L) * 0.17;
+    const getTiltForLayers = (L) => 0.72 + (1 - L / this.maxCapacity) * 0.68;
 
     const startLayers = currentLayersCount;
     const endLayers = currentLayersCount - amount;
@@ -1999,7 +1999,8 @@ class FlaskView {
     // --- 3. Dynamic Pouring Stream with Synchronized Tilting & Natural Curve ---
     const pourDuration = 880;
     const startTime = performance.now();
-    const layerH = (this.height - 24) / FLASK_CAP;
+    const sourceLayerH = (this.height - 26) / this.maxCapacity;
+    const targetLayerH = (target.height - 26) / target.maxCapacity;
     const initialTargetSurfaceY = target.baseY + target.getSurfaceY();
 
     // Particles for delicate luminous potion spray and rising micro-bubbles
@@ -2033,7 +2034,7 @@ class FlaskView {
       const startY = targetLipWorldY;
 
       // Current rising fluid level in target flask
-      const currentFillAmount = progress * layerH * amount;
+      const currentFillAmount = progress * targetLayerH * amount;
       const targetLiquidY = initialTargetSurfaceY - currentFillAmount;
 
       // Destination: Directly into the liquid surface of target flask
@@ -2194,8 +2195,8 @@ class FlaskView {
       target.drawFrontRimOverlay(splashGfx);
 
       // Synchronous Drain from Source & Rise in Target
-      this.drawLiquids(progress * layerH * amount, 0, null, currentRot);
-      target.drawLiquids(0, progress * layerH * amount, color, 0);
+      this.drawLiquids(progress * sourceLayerH * amount, 0, null, currentRot);
+      target.drawLiquids(0, progress * targetLayerH * amount, color, 0);
 
       await new Promise(r => requestAnimationFrame(r));
     }
