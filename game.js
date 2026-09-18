@@ -1,4 +1,4 @@
-const GAME_VERSION = "v74";
+const GAME_VERSION = "v75";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -149,7 +149,7 @@ class GameEngine {
     }
 
     if (this.currentRecipe) {
-      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Сварить <i>${this.currentRecipe.potionName}</i> (2🔴 + 2🔵)`;
+      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${this.currentRecipe.targetCount || 6} эссенций в Главную Колбу (0/${this.currentRecipe.targetCount || 6})`;
       recipeBanner.classList.remove("hidden");
     } else {
       recipeBanner.classList.add("hidden");
@@ -163,6 +163,7 @@ class GameEngine {
       const flask = new FlaskView(this, i, levelData[i]);
       if (this.currentRecipe && i === 0) {
         flask.isMasterVessel = true;
+        flask.maxCapacity = this.currentRecipe.targetCount || 6;
       }
       this.flasks.push(flask);
       this.flasksLayer.addChild(flask.container);
@@ -235,29 +236,65 @@ class GameEngine {
     const total = this.flasks.length;
 
     if (this.currentRecipe) {
-      // 🏰 Recipe Boss Level Layout: Central Master Crucible at top, ingredient flasks in bottom row
-      const masterW = Math.min(64, w * 0.18);
-      const masterH = masterW * 3.2;
+      // 🏰 Recipe Boss Level 5 Layout: Central Master Crucible in center, 4 side flasks on left, 4 on right
+      const masterW = Math.min(76, Math.floor(w * 0.22));
+      const masterH = Math.round(masterW * 3.4);
 
-      const sideCount = total - 1;
-      const sideW = Math.min(52, (w - 40) / sideCount - 12);
-      const sideH = sideW * 3.2;
+      const startY = Math.max(65, Math.round((h - masterH) / 2) - 10);
 
-      const startY = Math.max(30, h * 0.06);
-
-      // Position Master Crucible (Flask 0) in top center
+      // Position Master Crucible (Flask 0) in center
       this.flasks[0].setSize(masterW, masterH);
       this.flasks[0].setBasePosition(w / 2, startY);
 
-      // Position Side Flasks in bottom row with clear vertical gap
-      const spacingX = Math.min(102, (w - 20) / sideCount);
-      const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
-      const sideY = startY + masterH + 32;
+      if (total >= 9) {
+        // 4 flasks on left (2 top, 2 bot), 4 flasks on right (2 top, 2 bot)
+        const leftSpace = w / 2 - masterW / 2 - 12;
+        const sideW = Math.min(38, Math.floor((leftSpace - 14) / 2));
+        const sideH = Math.round(sideW * 3.4);
+        const gapX = sideW + 10;
+        const gapY = sideH + 20;
 
-      for (let i = 1; i < total; i++) {
-        const targetX = sideStartX + (i - 1) * spacingX;
-        this.flasks[i].setSize(sideW, sideH);
-        this.flasks[i].setBasePosition(targetX, sideY);
+        const leftCenterX = (w / 2 - masterW / 2) / 2;
+        const rightCenterX = w - leftCenterX;
+        const gridTopY = startY + Math.round((masterH - (2 * sideH + 20)) / 2);
+
+        // Left Side Flasks: Flasks 1, 2 (top), Flasks 3, 4 (bot)
+        const leftCoords = [
+          { x: leftCenterX - gapX / 2, y: gridTopY },
+          { x: leftCenterX + gapX / 2, y: gridTopY },
+          { x: leftCenterX - gapX / 2, y: gridTopY + gapY },
+          { x: leftCenterX + gapX / 2, y: gridTopY + gapY }
+        ];
+
+        // Right Side Flasks: Flasks 5, 6 (top), Flasks 7, 8 (bot)
+        const rightCoords = [
+          { x: rightCenterX - gapX / 2, y: gridTopY },
+          { x: rightCenterX + gapX / 2, y: gridTopY },
+          { x: rightCenterX - gapX / 2, y: gridTopY + gapY },
+          { x: rightCenterX + gapX / 2, y: gridTopY + gapY }
+        ];
+
+        for (let i = 1; i <= 4 && i < total; i++) {
+          this.flasks[i].setSize(sideW, sideH);
+          this.flasks[i].setBasePosition(leftCoords[i - 1].x, leftCoords[i - 1].y);
+        }
+        for (let i = 5; i <= 8 && i < total; i++) {
+          this.flasks[i].setSize(sideW, sideH);
+          this.flasks[i].setBasePosition(rightCoords[i - 5].x, rightCoords[i - 5].y);
+        }
+      } else {
+        const sideCount = total - 1;
+        const sideW = Math.min(44, (w - 30) / sideCount - 10);
+        const sideH = Math.round(sideW * 3.4);
+        const spacingX = sideW + 10;
+        const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
+        const sideY = startY + masterH + 26;
+
+        for (let i = 1; i < total; i++) {
+          const targetX = sideStartX + (i - 1) * spacingX;
+          this.flasks[i].setSize(sideW, sideH);
+          this.flasks[i].setBasePosition(targetX, sideY);
+        }
       }
       return;
     }
@@ -424,20 +461,29 @@ class GameEngine {
       fromIndex: from.index,
       toIndex: to.index,
       amount: amount,
-      colorId: colorId
+      colorId: colorId,
+      fromLayersBackup: [...from.layers],
+      toLayersBackup: [...to.layers]
     });
 
-    await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
+    if (to.isMasterVessel) {
+      await from.pourInto(to, 1, colorId, this.streamLayer, this.splashLayer);
+      from.layers = []; // Complete monochromatic side flask transfers its essence and empties
+      from.drawLiquids();
 
-    // If target is master vessel and full: check if recipe completed!
-    if (to.isMasterVessel && to.layers.length === FLASK_CAP && !to.isCapped) {
-      const rubyCount = to.layers.filter(c => c === 0).length;
-      const sapphireCount = to.layers.filter(c => c === 2).length;
-      if (rubyCount === 2 && sapphireCount === 2) {
-        await to.synthesizePotion();
-      } else {
-        await to.capFlask();
+      const recipeBanner = document.getElementById("recipe-banner");
+      if (this.currentRecipe && recipeBanner) {
+        const count = to.layers.length;
+        const target = to.maxCapacity;
+        recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${target} эссенций в Главную Колбу (${count}/${target})`;
       }
+    } else {
+      await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
+    }
+
+    // If target is master vessel and reached target capacity: synthesize potion!
+    if (to.isMasterVessel && to.layers.length >= to.maxCapacity && !to.isCapped) {
+      await to.synthesizePotion();
     } else if (to.isCompletedFull() && !to.isCapped) {
       await to.capFlask();
     }
@@ -490,7 +536,7 @@ class GameEngine {
     const color = solvedFlask ? PALETTE[solvedFlask.layers[0]] : PALETTE[0];
 
     preview.style.background = `radial-gradient(circle at 35% 35%, #${color.hex.toString(16)}, #05050a)`;
-    nameEl.textContent = color.name;
+    nameEl.textContent = this.currentRecipe ? this.currentRecipe.potionName : color.name;
 
     modal.classList.remove("hidden");
   }
@@ -505,13 +551,27 @@ class GameEngine {
       toFlask.uncapFlask();
     }
 
-    for (let i = 0; i < last.amount; i++) {
-      toFlask.layers.pop();
-      fromFlask.layers.push(last.colorId);
+    if (last.fromLayersBackup && last.toLayersBackup) {
+      fromFlask.layers = [...last.fromLayersBackup];
+      toFlask.layers = [...last.toLayersBackup];
+    } else {
+      for (let i = 0; i < last.amount; i++) {
+        toFlask.layers.pop();
+        fromFlask.layers.push(last.colorId);
+      }
     }
 
     fromFlask.drawLiquids();
     toFlask.drawLiquids();
+
+    if (this.currentRecipe) {
+      const recipeBanner = document.getElementById("recipe-banner");
+      if (recipeBanner) {
+        const count = this.flasks[0].layers.length;
+        const target = this.flasks[0].maxCapacity || 6;
+        recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${target} эссенций в Главную Колбу (${count}/${target})`;
+      }
+    }
   }
 
   restart() {
@@ -990,12 +1050,15 @@ class FlaskView {
     if (this.isCapped || target.isCapped) return false;
     if (this.layers.length === 0) return false;
     if (target.layers.length >= target.maxCapacity) return false;
-    if (target.isMasterVessel) return true; // Master Vessel accepts any ingredient!
+    if (target.isMasterVessel) {
+      return this.isCompletedFull();
+    }
     if (target.layers.length === 0) return true;
     return this.topColor() === target.topColor();
   }
 
   getAmountToPour(target) {
+    if (target.isMasterVessel) return 1;
     const available = this.topColorCount();
     const free = target.maxCapacity - target.layers.length;
     return Math.min(available, free);
@@ -1033,10 +1096,64 @@ class FlaskView {
 
     const w = this.width;
     const h = this.height;
+    const wRim = w * 0.55; // Elegant flared lip at top
+    const flareY = 20;
+
+    if (this.isMasterVessel) {
+      // 🔮 Master Crucible Vessel: Slender top neck + Wide rounded alchemical bulb bottom
+      const neckW = w * 0.32;
+      const bulbR = w * 0.58;
+      const bulbCenterY = h - bulbR - 4;
+      const neckY = h * 0.35;
+
+      const mRim = wRim - 2.5;
+      const mNeck = neckW - 2.5;
+      const mBulbR = bulbR - 2.5;
+
+      // 1. Fluid Mask (Bulbous bottom + neck)
+      m.beginFill(0xffffff);
+      m.moveTo(-mRim, 2);
+      m.quadraticCurveTo(-mNeck, 6, -mNeck, neckY);
+      m.arc(0, bulbCenterY, mBulbR, Math.PI + 0.35, -0.35, true);
+      m.lineTo(mNeck, neckY);
+      m.quadraticCurveTo(mNeck, 6, mRim, 2);
+      m.closePath();
+      m.endFill();
+
+      // 2. Translucent Ambient Glass Body (Bulbous bottom)
+      gB.beginFill(0x1a2b42, 0.45);
+      gB.moveTo(-wRim, 2);
+      gB.quadraticCurveTo(-neckW, 6, -neckW, neckY);
+      gB.arc(0, bulbCenterY, bulbR, Math.PI + 0.35, -0.35, true);
+      gB.lineTo(neckW, neckY);
+      gB.quadraticCurveTo(neckW, 6, wRim, 2);
+      gB.closePath();
+      gB.endFill();
+
+      // Dark interior throat depth inside open mouth
+      gB.beginFill(0x0a0614, 0.55);
+      gB.drawEllipse(0, 2, wRim - 4, 5);
+      gB.endFill();
+
+      // 3. Glass Highlights
+      gH.lineStyle(2.5, 0xd0e8ff, 0.65);
+      gH.moveTo(-wRim, 2);
+      gH.quadraticCurveTo(-neckW, 6, -neckW, neckY);
+      gH.arc(0, bulbCenterY, bulbR, Math.PI + 0.35, -0.35, true);
+      gH.lineTo(neckW, neckY);
+      gH.quadraticCurveTo(neckW, 6, wRim, 2);
+
+      // Gold mouth rim crowning the flared vessel
+      this.drawBackRim(gBack, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
+      this.drawBackRim(gBack, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
+
+      this.drawFrontRim(gH, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
+      this.drawFrontRim(gH, 0, 0, wRim - 4, 4.5, 1.5, 0xffffff, 0.9);
+      return;
+    }
+
     const r = w / 2; // Perfect tangential semicircle matching wall half-width
     const bottomArcY = h - r - 4;
-    const wRim = w * 0.55; // Elegant flared lip (41.8px at top)
-    const flareY = 20; // Flare starts smoothly at y=20
 
     // 1. Fluid Mask (Follows flared lip and smooth U-bottom with 2.5px inset)
     const mRim = wRim - 2.5;
@@ -1249,8 +1366,7 @@ class FlaskView {
   }
 
   async synthesizePotion() {
-    // 1. Magical synthesis reaction: color morph into radiant Amethyst/Magenta Master Potion
-    this.layers = [4, 4, 4, 4];
+    // 1. Magical synthesis reaction: radiant sparkling celebration
     this.drawLiquids();
     this.spawnCapSparkles();
     if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {

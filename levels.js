@@ -140,20 +140,25 @@ const PRESET_LEVELS = [
             []
         ]
     },
-    // Уровень 5: БОСС-УРОВЕНЬ: Ритуал Заварки «Пламенного Искровита»
+    // Уровень 5: БОСС-УРОВЕНЬ: Ритуал Заварки «Великого Эликсира»
     {
-        title: 'Урок 5: Ритуал Заварки «Пламенного Искровита»',
+        title: 'Урок 5: Ритуал Заварки «Великого Эликсира»',
         chapter: 'Семестр 1: Основы зельеварения',
         isRecipeLevel: true,
         recipe: {
-            potionName: 'Пламенный Искровит',
-            target: { ruby: 2, sapphire: 2 } // 2 Рубина + 2 Сапфира в Главный Сосуд #0
+            potionName: 'Великий Эликсир Магии',
+            targetCount: 6
         },
         flasks: [
-            [], // Flask #0: Главный Алхимический Сосуд (Магическая Реторта)
-            ['ruby', 'sapphire', 'ruby', 'sapphire'],
-            ['sapphire', 'ruby', 'sapphire', 'ruby'],
-            []
+            [], // Central Master Vessel (Flask 0)
+            ['ruby', 'sapphire', 'emerald', 'amber'],
+            ['amethyst', 'gold', 'ruby', 'sapphire'],
+            ['emerald', 'amber', 'amethyst', 'gold'],
+            ['sapphire', 'ruby', 'amber', 'emerald'],
+            ['gold', 'amethyst', 'sapphire', 'ruby'],
+            ['amber', 'emerald', 'gold', 'amethyst'],
+            [], // Empty Side Flask (Flask 7)
+            []  // Empty Side Flask (Flask 8)
         ]
     },
     // Уровень 6: Релакс после победы (Легкая разгрузка)
