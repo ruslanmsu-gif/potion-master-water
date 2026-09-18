@@ -1,4 +1,4 @@
-const GAME_VERSION = "v82";
+const GAME_VERSION = "v83";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -1954,10 +1954,13 @@ class FlaskView {
     }
 
     // Continuous physical tilt angle function based on fluid level
-    const getTiltForLayers = (L) => 0.72 + (1 - L / this.maxCapacity) * 0.68;
+    const getTiltForLayers = (L) => 0.72 + (1 - Math.max(0, L) / this.maxCapacity) * 0.68;
+
+    const drainAmount = target.isMasterVessel ? this.layers.length : amount;
+    const fillAmount = target.isMasterVessel ? 1 : amount;
 
     const startLayers = currentLayersCount;
-    const endLayers = currentLayersCount - amount;
+    const endLayers = currentLayersCount - drainAmount;
 
     const startTiltMag = getTiltForLayers(startLayers);
     const endTiltMag = getTiltForLayers(endLayers);
@@ -2019,7 +2022,7 @@ class FlaskView {
 
       // Dynamic tilt: continuously tilts at the exact rate liquid drains!
       // Fluid stays pinned right at the mouth nozzle lip throughout the pour.
-      const curEffectiveLayers = startLayers - progress * amount;
+      const curEffectiveLayers = startLayers - progress * drainAmount;
       const curTiltMag = getTiltForLayers(curEffectiveLayers);
       const currentRot = (isTargetOnRight ? 1 : -1) * curTiltMag;
       this.container.rotation = currentRot;
@@ -2034,7 +2037,7 @@ class FlaskView {
       const startY = targetLipWorldY;
 
       // Current rising fluid level in target flask
-      const currentFillAmount = progress * targetLayerH * amount;
+      const currentFillAmount = progress * targetLayerH * fillAmount;
       const targetLiquidY = initialTargetSurfaceY - currentFillAmount;
 
       // Destination: Directly into the liquid surface of target flask
@@ -2195,8 +2198,8 @@ class FlaskView {
       target.drawFrontRimOverlay(splashGfx);
 
       // Synchronous Drain from Source & Rise in Target
-      this.drawLiquids(progress * sourceLayerH * amount, 0, null, currentRot);
-      target.drawLiquids(0, progress * targetLayerH * amount, color, 0);
+      this.drawLiquids(progress * sourceLayerH * drainAmount, 0, null, currentRot);
+      target.drawLiquids(0, progress * targetLayerH * fillAmount, color, 0);
 
       await new Promise(r => requestAnimationFrame(r));
     }
@@ -2205,9 +2208,14 @@ class FlaskView {
     splashGfx.clear();
 
     // 4. Finalize layer states
-    for (let i = 0; i < amount; i++) {
-      this.layers.pop();
+    if (target.isMasterVessel) {
+      this.layers = [];
       target.layers.push(colorId);
+    } else {
+      for (let i = 0; i < amount; i++) {
+        this.layers.pop();
+        target.layers.push(colorId);
+      }
     }
 
     // 5. Un-tilt: remaining fluid sloshes back and settles smoothly at bottom
