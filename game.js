@@ -1,4 +1,4 @@
-const GAME_VERSION = "v79";
+const GAME_VERSION = "v80";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -149,7 +149,7 @@ class GameEngine {
     }
 
     if (this.currentRecipe) {
-      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${this.currentRecipe.targetCount || 6} эссенций в Главную Колбу (0/${this.currentRecipe.targetCount || 6})`;
+      recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Отсортируйте 6 цветов по колбам (0/6)`;
       recipeBanner.classList.remove("hidden");
     } else {
       recipeBanner.classList.add("hidden");
@@ -449,16 +449,25 @@ class GameEngine {
     target.style.top = `${bottomY}px`;
   }
 
+  isRitualUnlocked() {
+    if (!this.currentRecipe) return false;
+    const masterCount = this.flasks[0] ? this.flasks[0].layers.length : 0;
+    const fullSideCount = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
+    return (masterCount + fullSideCount) >= (this.currentRecipe.targetCount || 6);
+  }
+
   onFlaskClicked(flask) {
     if (window.soundEngine) window.soundEngine.init();
     if (this.isBusy || flask.isCapped) return;
 
     if (flask.isMasterVessel && !this.selectedFlask) {
-      const allSorted = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
-      if (allSorted < 6) {
+      if (!this.isRitualUnlocked()) {
+        const masterCount = this.flasks[0] ? this.flasks[0].layers.length : 0;
+        const fullSideCount = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
+        const totalCompleted = masterCount + fullSideCount;
         const recipeBanner = document.getElementById("recipe-banner");
         if (recipeBanner) {
-          recipeBanner.innerHTML = `🔒 <b>РИТУАЛ ЗАБЛОКИРОВАН:</b> Сначала отсортируйте 6 цветов! (${allSorted}/6)`;
+          recipeBanner.innerHTML = `🔒 <b>РИТУАЛ ЗАБЛОКИРОВАН:</b> Отсортируйте 6 цветов! (${totalCompleted}/6)`;
         }
       }
     }
@@ -517,10 +526,24 @@ class GameEngine {
       if (this.currentRecipe && recipeBanner) {
         const count = to.layers.length;
         const target = to.maxCapacity;
-        recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Собрать ${target} эссенций в Главную Колбу (${count}/${target})`;
+        recipeBanner.innerHTML = `✨ <b>РИТУАЛ В ДЕЙСТВИИ:</b> Переливание эссенций (${count}/${target})`;
       }
     } else {
       await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
+
+      if (this.currentRecipe) {
+        const recipeBanner = document.getElementById("recipe-banner");
+        if (recipeBanner) {
+          const masterCount = this.flasks[0] ? this.flasks[0].layers.length : 0;
+          const fullSideCount = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
+          const totalCompleted = masterCount + fullSideCount;
+          if (totalCompleted < 6) {
+            recipeBanner.innerHTML = `📜 <b>ЦЕЛЬ:</b> Отсортируйте 6 цветов по колбам (${totalCompleted}/6)`;
+          } else {
+            recipeBanner.innerHTML = `✨ <b>РИТУАЛ ОТКРЫТ!</b> Перелейте эссенции в Главную Колбу (${masterCount}/6)`;
+          }
+        }
+      }
     }
 
     // If target is master vessel and reached target capacity: synthesize potion!
@@ -1094,9 +1117,7 @@ class FlaskView {
     if (this.layers.length === 0) return false;
     if (target.layers.length >= target.maxCapacity) return false;
     if (target.isMasterVessel) {
-      // Master Vessel is locked until ALL 6 side flasks are monochromatic full!
-      const allSorted = this.engine.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length === 6;
-      if (!allSorted) return false;
+      if (!this.engine.isRitualUnlocked()) return false;
       return this.isCompletedFull();
     }
     if (target.layers.length === 0) return true;
