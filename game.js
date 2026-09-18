@@ -1,4 +1,4 @@
-const GAME_VERSION = "v78";
+const GAME_VERSION = "v79";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -237,26 +237,30 @@ class GameEngine {
 
     if (this.currentRecipe) {
       // 🏰 Recipe Boss Level 5 Layout: Central Master Crucible in center, 4 side flasks on left, 4 on right
-      const masterW = Math.min(76, Math.floor(w * 0.22));
+      const hasBoosters = total > 9;
+      const numRows = hasBoosters ? 3 : 2;
+
+      const masterW = Math.min(72, Math.floor(w * 0.22));
       const masterH = Math.round(masterW * 3.4);
 
-      const startY = Math.max(65, Math.round((h - masterH) / 2) - 10);
+      const leftSpace = w / 2 - masterW / 2 - 12;
+      const sideW = Math.min(36, Math.floor((leftSpace - 14) / 2));
+      const sideH = Math.round(sideW * 3.4);
+      const gapX = sideW + 8;
+      const gapY = sideH + (hasBoosters ? 12 : 20);
+
+      const totalGridH = numRows * sideH + (numRows - 1) * (hasBoosters ? 12 : 20);
+      const gridTopY = Math.max(68, Math.round((h - totalGridH) / 2) - 10);
+
+      const masterY = gridTopY + Math.round((2 * sideH + (hasBoosters ? 12 : 20) - masterH) / 2);
 
       // Position Master Crucible (Flask 0) in center
       this.flasks[0].setSize(masterW, masterH);
-      this.flasks[0].setBasePosition(w / 2, startY);
+      this.flasks[0].setBasePosition(w / 2, masterY);
 
       if (total >= 9) {
-        // 4 flasks on left (2 top, 2 bot), 4 flasks on right (2 top, 2 bot)
-        const leftSpace = w / 2 - masterW / 2 - 12;
-        const sideW = Math.min(38, Math.floor((leftSpace - 14) / 2));
-        const sideH = Math.round(sideW * 3.4);
-        const gapX = sideW + 10;
-        const gapY = sideH + 20;
-
         const leftCenterX = (w / 2 - masterW / 2) / 2;
         const rightCenterX = w - leftCenterX;
-        const gridTopY = startY + Math.round((masterH - (2 * sideH + 20)) / 2);
 
         // Left Side Flasks: Flasks 1, 2 (top), Flasks 3, 4 (bot)
         const leftCoords = [
@@ -275,22 +279,35 @@ class GameEngine {
         ];
 
         for (let i = 1; i <= 4 && i < total; i++) {
-          this.flasks[i].setSize(sideW, sideH);
-          this.flasks[i].setBasePosition(leftCoords[i - 1].x, leftCoords[i - 1].y);
+          const flask = this.flasks[i];
+          const capFrac = Math.min(1, flask.maxCapacity / FLASK_CAP);
+          const curH = Math.round((sideH - 26) * capFrac + 26);
+          const curY = leftCoords[i - 1].y + (sideH - curH);
+          flask.setSize(sideW, curH);
+          flask.setBasePosition(leftCoords[i - 1].x, curY);
         }
         for (let i = 5; i <= 8 && i < total; i++) {
-          this.flasks[i].setSize(sideW, sideH);
-          this.flasks[i].setBasePosition(rightCoords[i - 5].x, rightCoords[i - 5].y);
+          const flask = this.flasks[i];
+          const capFrac = Math.min(1, flask.maxCapacity / FLASK_CAP);
+          const curH = Math.round((sideH - 26) * capFrac + 26);
+          const curY = rightCoords[i - 5].y + (sideH - curH);
+          flask.setSize(sideW, curH);
+          flask.setBasePosition(rightCoords[i - 5].x, curY);
         }
-        // Extra Booster Flasks (i >= 9): position in 3rd row below grid!
+
+        // Extra Booster Flasks (i >= 9): position in 3rd row below grid, centered & completely visible!
         if (total > 9) {
           const extraCount = total - 9;
-          const extraSpacingX = sideW + 14;
+          const extraSpacingX = sideW + 12;
           const extraStartX = Math.round((w - (extraCount - 1) * extraSpacingX) / 2);
-          const extraY = gridTopY + 2 * gapY + 14;
+          const row3Y = gridTopY + 2 * gapY;
           for (let i = 9; i < total; i++) {
-            this.flasks[i].setSize(sideW, sideH);
-            this.flasks[i].setBasePosition(extraStartX + (i - 9) * extraSpacingX, extraY);
+            const flask = this.flasks[i];
+            const capFrac = Math.min(1, flask.maxCapacity / FLASK_CAP);
+            const curH = Math.round((sideH - 26) * capFrac + 26);
+            const curY = row3Y + (sideH - curH);
+            flask.setSize(sideW, curH);
+            flask.setBasePosition(extraStartX + (i - 9) * extraSpacingX, curY);
           }
         }
       } else {
@@ -299,12 +316,16 @@ class GameEngine {
         const sideH = Math.round(sideW * 3.4);
         const spacingX = sideW + 10;
         const sideStartX = (w - (sideCount - 1) * spacingX) / 2;
-        const sideY = startY + masterH + 26;
+        const sideY = gridTopY + masterH + 26;
 
         for (let i = 1; i < total; i++) {
+          const flask = this.flasks[i];
+          const capFrac = Math.min(1, flask.maxCapacity / FLASK_CAP);
+          const curH = Math.round((sideH - 26) * capFrac + 26);
           const targetX = sideStartX + (i - 1) * spacingX;
-          this.flasks[i].setSize(sideW, sideH);
-          this.flasks[i].setBasePosition(targetX, sideY);
+          const curY = sideY + (sideH - curH);
+          flask.setSize(sideW, curH);
+          flask.setBasePosition(targetX, curY);
         }
       }
       return;
