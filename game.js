@@ -1,4 +1,4 @@
-const GAME_VERSION = "v77";
+const GAME_VERSION = "v78";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -282,6 +282,17 @@ class GameEngine {
           this.flasks[i].setSize(sideW, sideH);
           this.flasks[i].setBasePosition(rightCoords[i - 5].x, rightCoords[i - 5].y);
         }
+        // Extra Booster Flasks (i >= 9): position in 3rd row below grid!
+        if (total > 9) {
+          const extraCount = total - 9;
+          const extraSpacingX = sideW + 14;
+          const extraStartX = Math.round((w - (extraCount - 1) * extraSpacingX) / 2);
+          const extraY = gridTopY + 2 * gapY + 14;
+          for (let i = 9; i < total; i++) {
+            this.flasks[i].setSize(sideW, sideH);
+            this.flasks[i].setBasePosition(extraStartX + (i - 9) * extraSpacingX, extraY);
+          }
+        }
       } else {
         const sideCount = total - 1;
         const sideW = Math.min(44, (w - 30) / sideCount - 10);
@@ -421,8 +432,18 @@ class GameEngine {
     if (window.soundEngine) window.soundEngine.init();
     if (this.isBusy || flask.isCapped) return;
 
+    if (flask.isMasterVessel && !this.selectedFlask) {
+      const allSorted = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
+      if (allSorted < 6) {
+        const recipeBanner = document.getElementById("recipe-banner");
+        if (recipeBanner) {
+          recipeBanner.innerHTML = `🔒 <b>РИТУАЛ ЗАБЛОКИРОВАН:</b> Сначала отсортируйте 6 цветов! (${allSorted}/6)`;
+        }
+      }
+    }
+
     if (!this.selectedFlask) {
-      if (flask.layers.length > 0) {
+      if (flask.layers.length > 0 && !flask.isMasterVessel) {
         this.selectedFlask = flask;
         flask.setSelected(true);
       }
@@ -438,7 +459,7 @@ class GameEngine {
         this.executePour(from, to);
       } else {
         this.selectedFlask.setSelected(false);
-        if (flask.layers.length > 0) {
+        if (flask.layers.length > 0 && !flask.isMasterVessel) {
           this.selectedFlask = flask;
           flask.setSelected(true);
         } else {
@@ -517,7 +538,8 @@ class GameEngine {
     }
 
     // 3. Admiration pause: allow player to view all completed, glowing flasks
-    await new Promise(r => setTimeout(r, 950));
+    const pauseTime = this.currentRecipe ? 3500 : 950;
+    await new Promise(r => setTimeout(r, pauseTime));
 
     // 4. Play grand victory sound & show modal
     if (window.soundEngine && typeof window.soundEngine.playLevelWin === 'function') {
@@ -1051,6 +1073,9 @@ class FlaskView {
     if (this.layers.length === 0) return false;
     if (target.layers.length >= target.maxCapacity) return false;
     if (target.isMasterVessel) {
+      // Master Vessel is locked until ALL 6 side flasks are monochromatic full!
+      const allSorted = this.engine.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length === 6;
+      if (!allSorted) return false;
       return this.isCompletedFull();
     }
     if (target.layers.length === 0) return true;
@@ -1263,38 +1288,43 @@ class FlaskView {
     const wRim = w * 0.55;
 
     if (this.isMasterVessel) {
-      // 💎 Magical Crystal Gem Stopper for Central Master Crucible
-      const gemR = wRim * 0.52;
-      const yGemCenter = cy - 14;
+      // 💎 Grand Magical Crystal Gem Stopper for Central Master Crucible
+      const gemR = wRim * 0.85; // Grand size matching wide flared neck
+      const yGemCenter = cy - 22;
 
       // Golden Crown Collar
       g.beginFill(0xffd700);
-      g.drawRect(-wRim * 0.42, cy - 2, wRim * 0.84, 10);
+      g.lineStyle(1.5, 0xffa000, 0.9);
+      g.drawRect(-wRim * 0.65, cy - 3, wRim * 1.3, 14);
       g.endFill();
 
       // Translucent Radiant Crystal Gem (Octagonal Faceted Gem)
-      g.beginFill(0x00e5ff, 0.85); // Radiant Cyan Crystal
-      g.lineStyle(1.8, 0xffffff, 0.95);
-      g.moveTo(0, yGemCenter - gemR - 4);
-      g.lineTo(gemR, yGemCenter - 4);
-      g.lineTo(gemR * 0.7, yGemCenter + gemR);
-      g.lineTo(-gemR * 0.7, yGemCenter + gemR);
-      g.lineTo(-gemR, yGemCenter - 4);
+      g.beginFill(0x00e5ff, 0.90); // Radiant Cyan Crystal
+      g.lineStyle(2.4, 0xffffff, 0.98);
+      g.moveTo(0, yGemCenter - gemR - 6);
+      g.lineTo(gemR, yGemCenter - 6);
+      g.lineTo(gemR * 0.72, yGemCenter + gemR);
+      g.lineTo(-gemR * 0.72, yGemCenter + gemR);
+      g.lineTo(-gemR, yGemCenter - 6);
       g.closePath();
       g.endFill();
 
       // Inner Crystal Facet Sheen
-      g.beginFill(0xffffff, 0.5);
-      g.moveTo(0, yGemCenter - gemR - 4);
-      g.lineTo(gemR * 0.4, yGemCenter - 2);
-      g.lineTo(0, yGemCenter + gemR * 0.6);
-      g.lineTo(-gemR * 0.3, yGemCenter);
+      g.lineStyle(0);
+      g.beginFill(0xffffff, 0.6);
+      g.moveTo(0, yGemCenter - gemR - 6);
+      g.lineTo(gemR * 0.45, yGemCenter - 2);
+      g.lineTo(0, yGemCenter + gemR * 0.65);
+      g.lineTo(-gemR * 0.35, yGemCenter);
       g.closePath();
       g.endFill();
 
+      // Golden Star Sparkle on Crystal Peak
+      this.drawStar(g, 0, yGemCenter - gemR - 6, 6, 0xffffff);
+
       // Plug entering throat
-      g.beginFill(0x00b0ff, 0.4);
-      g.drawRect(-wRim * 0.35, cy + 8, wRim * 0.7, 12);
+      g.beginFill(0x00b0ff, 0.5);
+      g.drawRect(-wRim * 0.5, cy + 11, wRim * 1.0, 16);
       g.endFill();
       return;
     }
@@ -1790,7 +1820,7 @@ class FlaskView {
       const topColor = PALETTE[this.topColor()];
       const w = this.width;
       const h = this.height;
-      const layerH = (h - 26) / FLASK_CAP;
+      const layerH = (h - 26) / this.maxCapacity;
       const surfaceY = (h - 8) - count * layerH;
 
       // Animated gentle wave at the top resting surface
@@ -1813,7 +1843,7 @@ class FlaskView {
     const topColor = PALETTE[this.topColor()];
     const w = this.width;
     const h = this.height;
-    const layerH = (h - 24) / FLASK_CAP;
+    const layerH = (h - 24) / this.maxCapacity;
     for (const s of this.sparkles) {
       s.y -= s.speed;
       if (s.y < 0) s.y = 1;
