@@ -1,4 +1,4 @@
-const GAME_VERSION = "v75";
+const GAME_VERSION = "v76";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -484,7 +484,7 @@ class GameEngine {
     // If target is master vessel and reached target capacity: synthesize potion!
     if (to.isMasterVessel && to.layers.length >= to.maxCapacity && !to.isCapped) {
       await to.synthesizePotion();
-    } else if (to.isCompletedFull() && !to.isCapped) {
+    } else if (to.isCompletedFull() && !to.isCapped && !this.currentRecipe) {
       await to.capFlask();
     }
 
@@ -1262,6 +1262,43 @@ class FlaskView {
     const cy = offsetY;
     const wRim = w * 0.55;
 
+    if (this.isMasterVessel) {
+      // 💎 Magical Crystal Gem Stopper for Central Master Crucible
+      const gemR = wRim * 0.52;
+      const yGemCenter = cy - 14;
+
+      // Golden Crown Collar
+      g.beginFill(0xffd700);
+      g.drawRect(-wRim * 0.42, cy - 2, wRim * 0.84, 10);
+      g.endFill();
+
+      // Translucent Radiant Crystal Gem (Octagonal Faceted Gem)
+      g.beginFill(0x00e5ff, 0.85); // Radiant Cyan Crystal
+      g.lineStyle(1.8, 0xffffff, 0.95);
+      g.moveTo(0, yGemCenter - gemR - 4);
+      g.lineTo(gemR, yGemCenter - 4);
+      g.lineTo(gemR * 0.7, yGemCenter + gemR);
+      g.lineTo(-gemR * 0.7, yGemCenter + gemR);
+      g.lineTo(-gemR, yGemCenter - 4);
+      g.closePath();
+      g.endFill();
+
+      // Inner Crystal Facet Sheen
+      g.beginFill(0xffffff, 0.5);
+      g.moveTo(0, yGemCenter - gemR - 4);
+      g.lineTo(gemR * 0.4, yGemCenter - 2);
+      g.lineTo(0, yGemCenter + gemR * 0.6);
+      g.lineTo(-gemR * 0.3, yGemCenter);
+      g.closePath();
+      g.endFill();
+
+      // Plug entering throat
+      g.beginFill(0x00b0ff, 0.4);
+      g.drawRect(-wRim * 0.35, cy + 8, wRim * 0.7, 12);
+      g.endFill();
+      return;
+    }
+
     // Proportions: compact cork that enters 3px into the potion
     const topCapW = wRim - 2.0;   // Protruding head (~39.8px)
     const mouthW = wRim - 3.5;    // Enters mouth (~38.3px)
@@ -1366,12 +1403,40 @@ class FlaskView {
   }
 
   async synthesizePotion() {
-    // 1. Magical synthesis reaction: radiant sparkling celebration
-    this.drawLiquids();
-    this.spawnCapSparkles();
+    // 1. Swirl & blend reaction: 6 colors mix together into radiant Prismatic Master Elixir
+    const duration = 1200;
+    const startTime = performance.now();
+    const origLayers = [...this.layers];
+
     if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {
       window.soundEngine.playFlaskComplete();
     }
+
+    await new Promise(resolve => {
+      const step = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / duration);
+
+        if (t < 0.8) {
+          const shift = Math.floor(t * 14) % 6;
+          this.layers = origLayers.map((_, idx) => (idx + shift) % 9);
+          this.drawLiquids(0, 0, null, Math.sin(t * Math.PI * 8) * 0.15);
+        } else {
+          // Final transformed state: 6 layers of radiant Prismatic Amethyst Potion (ID 4)
+          this.layers = [4, 4, 4, 4, 4, 4];
+          this.drawLiquids();
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          resolve();
+        }
+      };
+      requestAnimationFrame(step);
+    });
+
+    this.spawnCapSparkles();
     await this.capFlask();
   }
 
