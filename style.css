@@ -635,6 +635,20 @@ body {
   }
 }
 
+/* Dev Admin Auto-Solve Button */
+.dev-btn-solve {
+  background: linear-gradient(145deg, rgba(75, 25, 95, 0.95) 0%, rgba(35, 10, 50, 0.98) 100%) !important;
+  border: 1.8px solid #e040fb !important;
+  color: #ea80fc !important;
+  box-shadow: 0 0 14px rgba(224, 64, 251, 0.65), inset 0 0 8px rgba(224, 64, 251, 0.3) !important;
+}
+
+.dev-btn-solve:hover {
+  transform: scale(1.08);
+  border-color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(224, 64, 251, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.4) !important;
+}
+
 /* Mechanic & Recipe Instruction Modal Styling */
 .recipe-intro-card {
   background: linear-gradient(180deg, rgba(32, 22, 48, 0.98) 0%, rgba(14, 10, 22, 0.99) 100%) !important;

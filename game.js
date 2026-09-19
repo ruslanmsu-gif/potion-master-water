@@ -1,4 +1,4 @@
-const GAME_VERSION = "v85";
+const GAME_VERSION = "v86";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -922,6 +922,10 @@ class GameEngine {
       this.closeModal("mechanic-intro-modal");
     });
 
+    document.getElementById("btn-dev-solve")?.addEventListener("click", () => {
+      this.devAutoSort();
+    });
+
     document.getElementById("btn-restart").addEventListener("click", () => this.restart());
     document.getElementById("btn-undo").addEventListener("click", () => this.undo());
     document.getElementById("btn-add-flask")?.addEventListener("click", () => this.addMiniFlask());
@@ -976,6 +980,55 @@ class GameEngine {
     if (window.soundEngine && typeof window.soundEngine.playPourStart === 'function') {
       window.soundEngine.playPourStart();
     }
+  }
+
+  devAutoSort() {
+    if (this.isBusy) return;
+
+    if (this.currentRecipe) {
+      // Level 5 (Recipe Boss Level):
+      // Instantly collect & sort all 6 colors into 6 side flasks (Flasks 1 to 6)
+      // Master Vessel (Flask 0) is kept empty for manual pour testing!
+      const colors = [0, 1, 2, 3, 4, 6]; // Ruby, Emerald, Sapphire, Amber, Amethyst, Cyan
+      this.flasks[0].layers = [];
+
+      for (let i = 1; i < this.flasks.length; i++) {
+        const flask = this.flasks[i];
+        if (i <= 6) {
+          const colorId = colors[i - 1] ?? 0;
+          flask.layers = [colorId, colorId, colorId, colorId];
+        } else {
+          flask.layers = [];
+        }
+        flask.drawLiquids();
+      }
+      this.flasks[0].drawLiquids();
+    } else {
+      // Normal Levels (Levels 1-4, etc.):
+      // Collect all color IDs across all flasks, and fill flasks with 4 units of each color
+      const allColors = new Set();
+      for (const f of this.flasks) {
+        for (const c of f.layers) allColors.add(c);
+      }
+      const colorList = Array.from(allColors);
+
+      for (let i = 0; i < this.flasks.length; i++) {
+        const flask = this.flasks[i];
+        if (i < colorList.length) {
+          const c = colorList[i];
+          flask.layers = [c, c, c, c];
+        } else {
+          flask.layers = [];
+        }
+        flask.drawLiquids();
+      }
+    }
+
+    if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {
+      window.soundEngine.playFlaskComplete();
+    }
+
+    this.updateTutorialOverlay();
   }
 }
 
@@ -1179,13 +1232,25 @@ class FlaskView {
       gB.drawEllipse(0, 2, wRim - 4, 5);
       gB.endFill();
 
-      // 3. Glass Highlights
-      gH.lineStyle(2.5, 0xd0e8ff, 0.65);
+      // 3. Dual Glass Specular Highlights & 3D Volume
+      gH.lineStyle(2.8, 0xd0e8ff, 0.70);
       gH.moveTo(-wRim, 2);
       gH.quadraticCurveTo(-neckW, 6, -neckW, neckY);
       gH.arc(0, bulbCenterY, bulbR, Math.PI + 0.35, -0.35, true);
       gH.lineTo(neckW, neckY);
       gH.quadraticCurveTo(neckW, 6, wRim, 2);
+
+      // Inner 3D Glass Specular Sheen Arc
+      gH.lineStyle(2.0, 0xffffff, 0.45);
+      gH.moveTo(-wRim * 0.7, 8);
+      gH.quadraticCurveTo(-neckW * 0.7, neckY * 0.5, -neckW * 0.7, neckY);
+
+      // 4. Golden Ornate Neck Ring with Inlaid Gem
+      gH.lineStyle(2.2, 0xffd700, 0.95);
+      gH.drawEllipse(0, neckY, neckW * 1.1, 4.5);
+      gH.beginFill(0xff1744, 0.95);
+      gH.drawCircle(0, neckY, 3.5);
+      gH.endFill();
 
       // Gold mouth rim crowning the flared vessel
       this.drawBackRim(gBack, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
@@ -1307,20 +1372,41 @@ class FlaskView {
     const wRim = w * 0.55;
 
     if (this.isMasterVessel) {
-      // 💎 Grand Magical Crystal Gem Stopper for Central Master Crucible
+      // 💎 Grand Magical 3D Faceted Crystal Gem Stopper for Central Master Crucible
       const gemR = wRim * 0.85; // Grand size matching wide flared neck
       const yGemCenter = cy - 22;
 
-      // Golden Crown Collar
-      g.beginFill(0xffd700);
-      g.lineStyle(1.5, 0xffa000, 0.9);
-      g.drawRect(-wRim * 0.65, cy - 3, wRim * 1.3, 14);
+      // 1. Crystal Plug entering throat (Dark cyan glass seal inside throat)
+      const throatPlugW = w * 0.32 - 3;
+      g.lineStyle(0);
+      g.beginFill(0x0088cc, 0.45);
+      g.drawRect(-throatPlugW, cy + 2, throatPlugW * 2, 14);
       g.endFill();
 
-      // Translucent Radiant Crystal Gem (Octagonal Faceted Gem)
-      g.beginFill(0x00e5ff, 0.90); // Radiant Cyan Crystal
-      g.lineStyle(2.4, 0xffffff, 0.98);
-      g.moveTo(0, yGemCenter - gemR - 6);
+      // 2. Golden Royal Crown Collar (Curved filigree mount encircling vessel throat)
+      const collarW = wRim * 0.72;
+      g.beginFill(0xffd700);
+      g.lineStyle(1.8, 0xb8860b, 0.95);
+      g.drawRoundedRect(-collarW, cy - 6, collarW * 2, 14, 5);
+      g.endFill();
+
+      // Inner Gold Sheen Streak
+      g.lineStyle(0);
+      g.beginFill(0xffffff, 0.4);
+      g.drawRoundedRect(-collarW + 4, cy - 5, collarW * 2 - 8, 4, 2);
+      g.endFill();
+
+      // Ruby Gem Inlaid in Center of Crown Collar
+      g.beginFill(0xff1744);
+      g.lineStyle(1.2, 0xffd700, 0.95);
+      g.drawCircle(0, cy + 1, 4.5);
+      g.endFill();
+
+      // 3. Multi-Faceted 3D Crystal Gem Body (Octagonal Crystal with light refraction)
+      // Base Facet Shadow (Deep Teal / Dark Cyan)
+      g.beginFill(0x006699, 0.95);
+      g.lineStyle(2, 0xffffff, 0.95);
+      g.moveTo(0, yGemCenter - gemR - 8);
       g.lineTo(gemR, yGemCenter - 6);
       g.lineTo(gemR * 0.72, yGemCenter + gemR);
       g.lineTo(-gemR * 0.72, yGemCenter + gemR);
@@ -1328,23 +1414,39 @@ class FlaskView {
       g.closePath();
       g.endFill();
 
-      // Inner Crystal Facet Sheen
-      g.lineStyle(0);
-      g.beginFill(0xffffff, 0.6);
-      g.moveTo(0, yGemCenter - gemR - 6);
-      g.lineTo(gemR * 0.45, yGemCenter - 2);
-      g.lineTo(0, yGemCenter + gemR * 0.65);
-      g.lineTo(-gemR * 0.35, yGemCenter);
+      // Front Left Radiant Facet (Electric Cyan)
+      g.beginFill(0x00e5ff, 0.92);
+      g.lineStyle(1.2, 0x84ffff, 0.9);
+      g.moveTo(0, yGemCenter - gemR - 8);
+      g.lineTo(-gemR, yGemCenter - 6);
+      g.lineTo(-gemR * 0.72, yGemCenter + gemR);
+      g.lineTo(0, yGemCenter + gemR * 0.4);
       g.closePath();
       g.endFill();
 
-      // Golden Star Sparkle on Crystal Peak
-      this.drawStar(g, 0, yGemCenter - gemR - 6, 6, 0xffffff);
-
-      // Plug entering throat
-      g.beginFill(0x00b0ff, 0.5);
-      g.drawRect(-wRim * 0.5, cy + 11, wRim * 1.0, 16);
+      // Front Right Specular Facet (Light Sky Blue / Cyan)
+      g.beginFill(0x84ffff, 0.88);
+      g.lineStyle(1.2, 0xffffff, 0.95);
+      g.moveTo(0, yGemCenter - gemR - 8);
+      g.lineTo(gemR, yGemCenter - 6);
+      g.lineTo(gemR * 0.72, yGemCenter + gemR);
+      g.lineTo(0, yGemCenter + gemR * 0.4);
+      g.closePath();
       g.endFill();
+
+      // Top Specular Diamond Flare (Pure White Specular Core)
+      g.beginFill(0xffffff, 0.75);
+      g.lineStyle(0);
+      g.moveTo(0, yGemCenter - gemR - 8);
+      g.lineTo(gemR * 0.38, yGemCenter - 4);
+      g.lineTo(0, yGemCenter + gemR * 0.15);
+      g.lineTo(-gemR * 0.28, yGemCenter - 2);
+      g.closePath();
+      g.endFill();
+
+      // 4. Golden Star Lens Flare on Peak of Crystal
+      this.drawStar(g, 0, yGemCenter - gemR - 8, 7, 0xffffff);
+      this.drawStar(g, 0, yGemCenter - gemR - 8, 4, 0xffd700);
       return;
     }
 
