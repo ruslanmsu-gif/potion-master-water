@@ -1,4 +1,4 @@
-const GAME_VERSION = "v101";
+const GAME_VERSION = "v102";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -155,6 +155,9 @@ class GameEngine {
         topActions.classList.remove("hidden");
       }
     }
+
+    // Mystery level check for hidden ? layers
+    const isMysteryLevel = preset && (preset.isMysteryLevel || preset.hasHiddenLayers);
 
     // Glowing Info Button & Mechanic Instructions Modal ONLY on levels where a NEW mechanic is first introduced (Level 5, Level 6)
     const btnInfo = document.getElementById("btn-level-info");
