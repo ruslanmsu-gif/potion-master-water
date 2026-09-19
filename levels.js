@@ -186,17 +186,29 @@ const PRESET_LEVELS = [
             []  // Пустая колба 2
         ]
     },
-    // Уровень 7: Напряжение
+    // Уровень 7: Повышенная сложность со скрытыми слоями
     {
-        title: 'Урок 7: Тайные пропорции',
+        title: 'Урок 7: Тайны Глубоких Сводов',
         chapter: 'Семестр 1: Основы зельеварения',
+        isMysteryLevel: true,
+        introTitle: 'ТАЙНЫ ГЛУБОКИХ СВОДОВ',
+        introSteps: [
+            'Глубокая перемешка ингредиентов под знаками ❓',
+            'Планируйте переливания в 2 пустые колбы.',
+            'Раскапывайте ключевые цвета, чтобы не заблокировать ходы!'
+        ],
         flasks: [
-            ['ruby', 'amber', 'emerald', 'sapphire'],
-            ['sapphire', 'ruby', 'amber', 'emerald'],
-            ['emerald', 'sapphire', 'ruby', 'amber'],
-            ['amber', 'emerald', 'sapphire', 'ruby'],
-            [],
-            []
+            ['ruby', 'cyan', 'amethyst', 'rose'],
+            ['emerald', 'amber', 'violet', 'gold'],
+            ['sapphire', 'rose', 'ruby', 'cyan'],
+            ['amber', 'emerald', 'gold', 'amethyst'],
+            ['amethyst', 'violet', 'rose', 'ruby'],
+            ['gold', 'sapphire', 'cyan', 'amber'],
+            ['cyan', 'ruby', 'emerald', 'violet'],
+            ['rose', 'gold', 'amber', 'sapphire'],
+            ['violet', 'amethyst', 'sapphire', 'emerald'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
         ]
     },
     // Уровень 8: Волна релакса
