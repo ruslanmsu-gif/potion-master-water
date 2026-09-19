@@ -1,4 +1,4 @@
-const GAME_VERSION = "v98";
+const GAME_VERSION = "v99";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -156,12 +156,11 @@ class GameEngine {
       }
     }
 
-    // Glowing Info Button & Mechanic Instructions Modal for Recipe / Mystery Levels
+    // Glowing Info Button & Mechanic Instructions Modal ONLY on levels where a NEW mechanic is first introduced (Level 5, Level 6)
     const btnInfo = document.getElementById("btn-level-info");
-    const isMysteryLevel = preset && (preset.isMysteryLevel || preset.hasHiddenLayers);
-    const hasIntro = preset && (preset.isRecipeLevel || isMysteryLevel || preset.introSteps);
+    const isFirstMechanicIntro = (levelNum === 5 || levelNum === 6 || (preset && preset.isFirstMechanicIntro));
 
-    if (hasIntro) {
+    if (isFirstMechanicIntro) {
       if (btnInfo) btnInfo.classList.remove("hidden");
 
       const titleElem = document.getElementById("mechanic-intro-title");
