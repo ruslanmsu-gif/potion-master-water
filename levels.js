@@ -216,15 +216,15 @@ const PRESET_LEVELS = [
         title: 'Урок 8: Узел Архимага',
         chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['ruby', 'ruby', 'emerald', 'sapphire'],
-            ['amethyst', 'cyan', 'amber', 'sapphire'],
-            ['emerald', 'emerald', 'rose', 'amber'],
-            ['gold', 'violet', 'cyan', 'ruby'],
-            ['violet', 'violet', 'gold', 'emerald'],
-            ['rose', 'amber', 'sapphire', 'cyan'],
-            ['cyan', 'amethyst', 'amber', 'rose'],
-            ['sapphire', 'amethyst', 'ruby', 'violet'],
-            ['gold', 'gold', 'amethyst', 'rose'],
+            ['emerald', 'violet', 'cyan', 'sapphire'],
+            ['amethyst', 'gold', 'amber', 'sapphire'],
+            ['gold', 'cyan', 'rose', 'ruby'],
+            ['amethyst', 'violet', 'emerald', 'ruby'],
+            ['cyan', 'rose', 'violet', 'gold'],
+            ['violet', 'ruby', 'sapphire', 'amber'],
+            ['ruby', 'amber', 'cyan', 'emerald'],
+            ['rose', 'gold', 'emerald', 'amethyst'],
+            ['amber', 'amethyst', 'sapphire', 'rose'],
             [], // Пустая колба 1
             []  // Пустая колба 2
         ]
