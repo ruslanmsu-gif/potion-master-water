@@ -1,4 +1,4 @@
-const GAME_VERSION = "v99";
+const GAME_VERSION = "v101";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -721,19 +721,28 @@ class GameEngine {
     this.renderSagaNodes();
     this.populateCollectionGrid();
     this.renderLeaderboard("all-time");
-
-    // Scroll to bottom (Chapter 1) on load
-    const scrollToBottom = () => {
-      const sagaContainer = document.getElementById("saga-map-container");
-      if (sagaContainer) {
-        sagaContainer.scrollTop = 99999;
-      }
-    };
-    scrollToBottom();
-    setTimeout(scrollToBottom, 50);
-    setTimeout(scrollToBottom, 250);
-
+    this.scrollToCurrentNode();
     this.updateQuickPlayBtn();
+  }
+
+  scrollToCurrentNode() {
+    const sagaContainer = document.getElementById("saga-map-container");
+    if (!sagaContainer) return;
+
+    const currentChapter = Math.ceil(this.currentLevel / 50) || 1;
+    const chapterY = [1440, 1340, 1180, 1020, 860, 700, 540, 380, 220, 100];
+    const targetY = chapterY[Math.min(9, Math.max(0, currentChapter - 1))];
+
+    const containerH = sagaContainer.clientHeight || 500;
+    const targetScrollTop = Math.max(0, targetY - containerH / 2);
+
+    const doScroll = () => {
+      sagaContainer.scrollTop = targetScrollTop;
+    };
+    doScroll();
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 60);
+    setTimeout(doScroll, 200);
   }
 
   renderSagaNodes() {
@@ -766,7 +775,7 @@ class GameEngine {
     nodeCoords.forEach(node => {
       const wrapper = document.createElement("div");
       wrapper.className = "saga-node-wrapper";
-      wrapper.style.left = `${node.x}px`;
+      wrapper.style.left = `${(node.x / 400) * 100}%`;
       wrapper.style.top = `${node.y}px`;
 
       let stateClass = "locked-node";
@@ -838,6 +847,7 @@ class GameEngine {
       if (statsContainer) {
         statsContainer.className = "tab-view-container tab-view-hidden-left";
       }
+      this.scrollToCurrentNode();
     } else if (tabId === "collection") {
       if (quickBtn) quickBtn.style.display = "none";
       if (archEl) archEl.style.display = "none";
@@ -871,12 +881,20 @@ class GameEngine {
 
   openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+      modal.style.pointerEvents = "auto";
+    }
   }
 
   closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add("hidden");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+      modal.style.pointerEvents = "none";
+    }
   }
 
   showGameplayScreen() {
@@ -899,6 +917,7 @@ class GameEngine {
 
     this.switchTab("map");
     this.renderSagaNodes();
+    this.scrollToCurrentNode();
   }
 
   populateCollectionGrid() {
