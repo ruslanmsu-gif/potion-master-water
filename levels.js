@@ -235,15 +235,15 @@ const PRESET_LEVELS = [
         chapter: 'Семестр 1: Основы зельеварения',
         isMysteryLevel: true,
         flasks: [
-            ['ruby', 'amber', 'emerald', 'sapphire'],
-            ['sapphire', 'cyan', 'ruby', 'gold'],
-            ['gold', 'violet', 'sapphire', 'rose'],
-            ['rose', 'emerald', 'amber', 'amethyst'],
-            ['amethyst', 'ruby', 'cyan', 'amber'],
-            ['emerald', 'gold', 'violet', 'cyan'],
-            ['amber', 'amethyst', 'rose', 'violet'],
-            ['cyan', 'sapphire', 'amethyst', 'ruby'],
-            ['violet', 'rose', 'gold', 'emerald'],
+            ['violet', 'amber', 'cyan', 'ruby'],
+            ['sapphire', 'cyan', 'emerald', 'ruby'],
+            ['ruby', 'violet', 'gold', 'amethyst'],
+            ['emerald', 'cyan', 'gold', 'cyan'],
+            ['emerald', 'amethyst', 'rose', 'gold'],
+            ['sapphire', 'rose', 'amber', 'emerald'],
+            ['violet', 'amber', 'gold', 'rose'],
+            ['sapphire', 'rose', 'violet', 'amethyst'],
+            ['sapphire', 'ruby', 'amber', 'amethyst'],
             [], // Пустая колба 1
             []  // Пустая колба 2
         ]
