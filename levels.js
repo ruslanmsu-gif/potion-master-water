@@ -161,15 +161,29 @@ const PRESET_LEVELS = [
             []  // Empty Side Flask (Flask 8)
         ]
     },
-    // Уровень 6: Релакс после победы (Легкая разгрузка)
+    // Уровень 6: Введение новой механики «Скрытые Слои (Тайные Зелья)»
     {
-        title: 'Урок 6: Передышка Ученика',
+        title: 'Урок 6: Тайна Запечатанных Сосудов',
         chapter: 'Семестр 1: Основы зельеварения',
+        isMysteryLevel: true,
+        introTitle: 'ТАЙНЫЕ СЛОИ ЗЕЛИЙ',
+        introSteps: [
+            'Нижние слои скрыты под знаками вопроса ❓',
+            'В каждой колбе открыт только самый верхний цвет.',
+            'Перелейте верхний слой, чтобы открыть цвет под ним!'
+        ],
         flasks: [
-            ['ruby', 'emerald', 'ruby', 'emerald'],
-            ['emerald', 'ruby', 'emerald', 'ruby'],
-            [],
-            []
+            ['amber', 'violet', 'rose', 'amber'],
+            ['amethyst', 'gold', 'cyan', 'rose'],
+            ['violet', 'ruby', 'sapphire', 'emerald'],
+            ['amber', 'amethyst', 'gold', 'cyan'],
+            ['rose', 'violet', 'ruby', 'sapphire'],
+            ['emerald', 'amber', 'amethyst', 'gold'],
+            ['cyan', 'rose', 'violet', 'ruby'],
+            ['sapphire', 'emerald', 'amber', 'amethyst'],
+            ['gold', 'cyan', 'rose', 'violet'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
         ]
     },
     // Уровень 7: Напряжение

@@ -1,4 +1,4 @@
-const GAME_VERSION = "v88";
+const GAME_VERSION = "v89";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -29,13 +29,20 @@ const LEADERBOARD_DATA = {
     { rank: 1, name: "ВЫ (Гарри Поттер)", title: "Магистр Зелий", avatar: "🧙‍♂️", house: "🦁 Gryffindor", score: "1,250", level: 7, isUser: true },
     { rank: 2, name: "Hermione Granger", title: "Знаток Рецептов", avatar: "📚", house: "🦁 Gryffindor", score: "1,100", level: 6, isUser: false },
     { rank: 3, name: "Draco Malfoy", title: "Адепт Слизерина", avatar: "🐍", house: "🐍 Slytherin", score: "950", level: 5, isUser: false },
-    { rank: 4, name: "Ron Weasley", title: "Рыцарь Гриффиндора", avatar: "♟️", house: "🦁 Gryffindor", score: "820", level: 4, isUser: false },
-    { rank: 5, name: "Luna Lovegood", title: "Мистический Адепт", avatar: "✨", house: "🦅 Ravenclaw", score: "710", level: 4, isUser: false },
-    { rank: 6, name: "Neville Longbottom", title: "Мастер Травологии", avatar: "🌱", house: "🦁 Gryffindor", score: "600", level: 3, isUser: false },
-    { rank: 7, name: "Cho Chang", title: "Ловец Когтеврана", avatar: "🦅", house: "🦅 Ravenclaw", score: "520", level: 3, isUser: false },
-    { rank: 8, name: "Fred Weasley", title: "Изобретатель", avatar: "💥", house: "🦁 Gryffindor", score: "440", level: 2, isUser: false },
-    { rank: 9, name: "George Weasley", title: "Изобретатель", avatar: "🎆", house: "🦁 Gryffindor", score: "420", level: 2, isUser: false },
-    { rank: 10, name: "Seamus Finnigan", title: "Новичк-Алхимик", avatar: "💣", house: "🦁 Gryffindor", score: "310", level: 1, isUser: false }
+    { name: "AlchemistMaster", score: 14200, avatar: "🧙‍♂️" },
+    { name: "PotionQueen",     score: 12850, avatar: "👩‍🔬" },
+    { name: "SpellCaster",     score: 11400, avatar: "✨" },
+    { name: "RuneSeeker",      score: 9950,  avatar: "📜" },
+    { name: "StarDust99",      score: 8700,  avatar: "🌟" }
+  ],
+  "weekly": [
+    { name: "PotionQueen",     score: 4150, avatar: "👩‍🔬" },
+    { name: "StarDust99",      score: 3800, avatar: "🌟" },
+    { name: "AlchemistMaster", score: 3620, avatar: "🧙‍♂️" }
+  ],
+  "friends": [
+    { name: "AlchemistMaster", score: 14200, avatar: "🧙‍♂️" },
+    { name: "YourFriendAlex",  score: 6400,  avatar: "🧑‍🌾" }
   ]
 };
 
@@ -50,6 +57,15 @@ const PALETTE = [
   { id: 7, name: "Rose Pink",     hex: 0xff4081, inner: 0xa80045, glow: 0xff80ab, sparkles: 0xffd1dc },
   { id: 8, name: "Obsidian Violet", hex: 0x7c4dff, inner: 0x536dfe, glow: 0xb388ff, sparkles: 0xe040fb }
 ];
+
+const MYSTERY_COLOR = {
+  id: -1,
+  name: "Mystery Segment",
+  hex: 0x2b313d,
+  inner: 0x1d222b,
+  glow: 0x485465,
+  sparkles: 0x8a9bb0
+};
 
 const FLASK_CAP = 4;
 
@@ -140,10 +156,37 @@ class GameEngine {
       }
     }
 
-    // Glowing Info Button & Mechanic Instructions Modal for Recipe Levels
+    // Glowing Info Button & Mechanic Instructions Modal for Recipe / Mystery Levels
     const btnInfo = document.getElementById("btn-level-info");
-    if (this.currentRecipe) {
+    const isMysteryLevel = preset && (preset.isMysteryLevel || preset.hasHiddenLayers);
+    const hasIntro = preset && (preset.isRecipeLevel || isMysteryLevel || preset.introSteps);
+
+    if (hasIntro) {
       if (btnInfo) btnInfo.classList.remove("hidden");
+
+      const titleElem = document.getElementById("mechanic-intro-title");
+      if (titleElem && preset.introTitle) {
+        titleElem.textContent = preset.introTitle;
+      } else if (titleElem && preset.isRecipeLevel) {
+        titleElem.textContent = "РИТУАЛ АЛХИМИИ";
+      }
+
+      const stepsContainer = document.querySelector(".intro-steps-list");
+      if (stepsContainer && preset.introSteps) {
+        stepsContainer.innerHTML = preset.introSteps.map((step, idx) => `
+          <div class="intro-step">
+            <span class="step-num">${idx + 1}</span>
+            <span>${step}</span>
+          </div>
+        `).join("");
+      } else if (stepsContainer && preset.isRecipeLevel) {
+        stepsContainer.innerHTML = `
+          <div class="intro-step"><span class="step-num">1</span><span>Отсортируйте все <b>6 цветов</b> по боковым колбам.</span></div>
+          <div class="intro-step"><span class="step-num">2</span><span>После сборки цветов <b>Главная Колба</b> разблокируется.</span></div>
+          <div class="intro-step"><span class="step-num">3</span><span>Перелейте эссенции в Главную Колбу для синтеза зелья!</span></div>
+        `;
+      }
+
       this.openModal("mechanic-intro-modal");
     } else {
       if (btnInfo) btnInfo.classList.add("hidden");
@@ -159,6 +202,11 @@ class GameEngine {
       if (this.currentRecipe && i === 0) {
         flask.isMasterVessel = true;
         flask.maxCapacity = this.currentRecipe.targetCount || 6;
+      }
+      if (isMysteryLevel && flask.layers.length > 0 && !flask.isMasterVessel) {
+        flask.hiddenCount = Math.max(0, flask.layers.length - 1);
+      } else {
+        flask.hiddenCount = 0;
       }
       this.flasks.push(flask);
       this.flasksLayer.addChild(flask.container);
@@ -514,7 +562,9 @@ class GameEngine {
       amount: amount,
       colorId: colorId,
       fromLayersBackup: [...from.layers],
-      toLayersBackup: [...to.layers]
+      toLayersBackup: [...to.layers],
+      fromHiddenBackup: from.hiddenCount,
+      toHiddenBackup: to.hiddenCount
     });
 
     if (to.isMasterVessel) {
@@ -599,6 +649,8 @@ class GameEngine {
     if (last.fromLayersBackup && last.toLayersBackup) {
       fromFlask.layers = [...last.fromLayersBackup];
       toFlask.layers = [...last.toLayersBackup];
+      if (last.fromHiddenBackup !== undefined) fromFlask.hiddenCount = last.fromHiddenBackup;
+      if (last.toHiddenBackup !== undefined) toFlask.hiddenCount = last.toHiddenBackup;
     } else {
       for (let i = 0; i < last.amount; i++) {
         toFlask.layers.pop();
@@ -985,6 +1037,10 @@ class GameEngine {
   devAutoSort() {
     if (this.isBusy) return;
 
+    for (const flask of this.flasks) {
+      flask.hiddenCount = 0;
+    }
+
     if (this.currentRecipe) {
       // Level 5 (Recipe Boss Level):
       // Instantly collect & sort all 6 colors into 6 side flasks (Flasks 1 to 6)
@@ -1087,6 +1143,23 @@ class FlaskView {
     this.isReceiving = false;
     this.isCapped = false;
     this.corkDisplacement = 0;
+    this.hiddenCount = 0;
+
+    // Create ? text labels for hidden segments
+    this.questionLabels = [];
+    for (let k = 0; k < FLASK_CAP; k++) {
+      const qText = new PIXI.Text('?', {
+        fontFamily: 'Cinzel, Arial, sans-serif',
+        fontSize: 16,
+        fontWeight: 'bold',
+        fill: 0xffffff,
+        align: 'center'
+      });
+      qText.anchor.set(0.5, 0.5);
+      qText.visible = false;
+      this.liquidContainer.addChild(qText);
+      this.questionLabels.push(qText);
+    }
 
     // Magical sparkles
     this.sparkles = [];
@@ -1733,7 +1806,8 @@ class FlaskView {
     let curChunk = null;
 
     for (let i = 0; i < count; i++) {
-      const colorId = this.layers[i];
+      const isHidden = (i < this.hiddenCount);
+      const colorId = isHidden ? -1 : this.layers[i];
       if (!curChunk || curChunk.colorId !== colorId) {
         curChunk = { colorId: colorId, startIndex: i, layerCount: 1, extraH: 0 };
         chunks.push(curChunk);
@@ -1809,7 +1883,7 @@ class FlaskView {
     for (let c = 0; c < chunks.length; c++) {
       if (chunkHeights[c] <= 0) continue;
 
-      const color = PALETTE[chunks[c].colorId];
+      const color = chunks[c].colorId === -1 ? MYSTERY_COLOR : PALETTE[chunks[c].colorId];
       const isBottomChunk = (c === 0);
       const isTopChunk = (c === topIdx);
 
@@ -1903,6 +1977,19 @@ class FlaskView {
       g.beginFill(0xffffff, 0.12);
       g.drawPolygon(corePoly);
       g.endFill();
+    }
+
+    // Position Question Mark labels for hidden segments
+    if (this.questionLabels) {
+      for (let k = 0; k < FLASK_CAP; k++) {
+        if (k < count && k < this.hiddenCount) {
+          this.questionLabels[k].visible = true;
+          this.questionLabels[k].y = (h - 8) - (k + 0.5) * layerH;
+          this.questionLabels[k].x = 0;
+        } else {
+          this.questionLabels[k].visible = false;
+        }
+      }
     }
   }
 
@@ -2282,6 +2369,13 @@ class FlaskView {
       for (let i = 0; i < amount; i++) {
         this.layers.pop();
         target.layers.push(colorId);
+      }
+    }
+
+    if (this.hiddenCount > 0 && this.hiddenCount >= this.layers.length) {
+      this.hiddenCount = Math.max(0, this.layers.length - 1);
+      if (window.soundEngine && typeof window.soundEngine.playChime === 'function') {
+        window.soundEngine.playChime();
       }
     }
 
