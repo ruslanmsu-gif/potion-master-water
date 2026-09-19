@@ -198,15 +198,15 @@ const PRESET_LEVELS = [
             'Раскапывайте ключевые цвета, чтобы не заблокировать ходы!'
         ],
         flasks: [
-            ['ruby', 'cyan', 'amethyst', 'rose'],
-            ['emerald', 'amber', 'violet', 'gold'],
-            ['sapphire', 'rose', 'ruby', 'cyan'],
-            ['amber', 'emerald', 'gold', 'amethyst'],
-            ['amethyst', 'violet', 'rose', 'ruby'],
-            ['gold', 'sapphire', 'cyan', 'amber'],
-            ['cyan', 'ruby', 'emerald', 'violet'],
-            ['rose', 'gold', 'amber', 'sapphire'],
-            ['violet', 'amethyst', 'sapphire', 'emerald'],
+            ['cyan', 'cyan', 'amber', 'ruby'],
+            ['violet', 'amethyst', 'rose', 'ruby'],
+            ['emerald', 'amber', 'amber', 'sapphire'],
+            ['gold', 'violet', 'violet', 'sapphire'],
+            ['ruby', 'rose', 'rose', 'gold'],
+            ['amethyst', 'cyan', 'cyan', 'gold'],
+            ['gold', 'ruby', 'amethyst', 'emerald'],
+            ['sapphire', 'emerald', 'emerald', 'amethyst'],
+            ['violet', 'sapphire', 'amber', 'rose'],
             [], // Пустая колба 1
             []  // Пустая колба 2
         ]
