@@ -1,4 +1,4 @@
-const GAME_VERSION = "v106";
+const GAME_VERSION = "v107";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -575,6 +575,20 @@ class GameEngine {
       from.drawLiquids();
     } else {
       await from.pourInto(to, amount, colorId, this.streamLayer, this.splashLayer);
+    }
+
+    // If target flask reaches full capacity with all identical colors, unveil any remaining mystery layers
+    if (!to.isMasterVessel && to.layers.length === to.maxCapacity) {
+      const first = to.layers[0];
+      if (to.layers.every(c => c === first)) {
+        if (to.hiddenCount > 0) {
+          to.hiddenCount = 0;
+          to.drawLiquids();
+          if (window.soundEngine && typeof window.soundEngine.playChime === 'function') {
+            window.soundEngine.playChime();
+          }
+        }
+      }
     }
 
     // If target is master vessel and reached target capacity: synthesize potion!
@@ -1258,12 +1272,14 @@ class FlaskView {
   isSolved() {
     if (this.isMasterVessel) return this.isCapped;
     if (this.layers.length === 0) return true;
+    if (this.hiddenCount > 0) return false;
     if (this.layers.length < FLASK_CAP) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
   }
 
   isCompletedFull() {
+    if (this.hiddenCount > 0) return false;
     if (this.layers.length !== FLASK_CAP) return false;
     const first = this.layers[0];
     return this.layers.every(c => c === first);
@@ -1685,7 +1701,9 @@ class FlaskView {
 
   async capFlask() {
     if (this.isCapped) return;
+    this.hiddenCount = 0;
     this.isCapped = true;
+    this.drawLiquids();
 
     // Snappy drop animation into flask mouth (-38px down into neck 0px)
     const duration = 220;
@@ -1827,7 +1845,7 @@ class FlaskView {
     let curChunk = null;
 
     for (let i = 0; i < count; i++) {
-      const isHidden = (i < this.hiddenCount);
+      const isHidden = (i < this.hiddenCount) && !this.isCapped;
       const colorId = isHidden ? -1 : this.layers[i];
       if (!curChunk || curChunk.colorId !== colorId) {
         curChunk = { colorId: colorId, startIndex: i, layerCount: 1, extraH: 0 };
@@ -2003,7 +2021,7 @@ class FlaskView {
     // Position Question Mark labels for hidden segments
     if (this.questionLabels) {
       for (let k = 0; k < FLASK_CAP; k++) {
-        if (k < count && k < this.hiddenCount) {
+        if (k < count && k < this.hiddenCount && !this.isCapped) {
           this.questionLabels[k].visible = true;
           this.questionLabels[k].y = (h - 8) - (k + 0.5) * layerH;
           this.questionLabels[k].x = 0;
