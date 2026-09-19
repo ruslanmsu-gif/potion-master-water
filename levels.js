@@ -173,7 +173,7 @@ const PRESET_LEVELS = [
             'Перелейте верхний слой, чтобы открыть цвет под ним!'
         ],
         flasks: [
-            ['amber', 'violet', 'rose', 'amber'],
+            ['ruby', 'sapphire', 'emerald', 'amber'],
             ['amethyst', 'gold', 'cyan', 'rose'],
             ['violet', 'ruby', 'sapphire', 'emerald'],
             ['amber', 'amethyst', 'gold', 'cyan'],

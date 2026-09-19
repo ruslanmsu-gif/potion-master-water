@@ -1,4 +1,4 @@
-const GAME_VERSION = "v89";
+const GAME_VERSION = "v90";
 
 const LEADERBOARD_DATA = {
   "all-time": [
