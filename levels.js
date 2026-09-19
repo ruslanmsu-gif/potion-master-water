@@ -229,18 +229,23 @@ const PRESET_LEVELS = [
             []  // Пустая колба 2
         ]
     },
-    // Уровень 9: Ввод 5-го цвета (Amethyst)
+    // Уровень 9: Высокая сложность со скрытыми слоями (Лабиринт Теней)
     {
-        title: 'Урок 9: Ночная настойка',
+        title: 'Урок 9: Лабиринт Теней',
         chapter: 'Семестр 1: Основы зельеварения',
+        isMysteryLevel: true,
         flasks: [
-            ['amethyst', 'ruby', 'emerald', 'sapphire'],
-            ['amber', 'amethyst', 'ruby', 'emerald'],
-            ['sapphire', 'amber', 'amethyst', 'ruby'],
-            ['emerald', 'sapphire', 'amber', 'amethyst'],
-            ['ruby', 'emerald', 'sapphire', 'amber'],
-            [],
-            []
+            ['amber', 'violet', 'emerald', 'ruby'],
+            ['cyan', 'ruby', 'amethyst', 'sapphire'],
+            ['gold', 'sapphire', 'rose', 'emerald'],
+            ['ruby', 'cyan', 'gold', 'amber'],
+            ['violet', 'emerald', 'amber', 'amethyst'],
+            ['rose', 'gold', 'violet', 'cyan'],
+            ['sapphire', 'amethyst', 'ruby', 'rose'],
+            ['amethyst', 'rose', 'cyan', 'violet'],
+            ['emerald', 'amber', 'sapphire', 'gold'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
         ]
     },
     // Уровень 10: Босс-сессия 1 курса (Экзамен Снейпа)
