@@ -1,4 +1,4 @@
-const GAME_VERSION = "v86";
+const GAME_VERSION = "v88";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -1240,17 +1240,7 @@ class FlaskView {
       gH.lineTo(neckW, neckY);
       gH.quadraticCurveTo(neckW, 6, wRim, 2);
 
-      // Inner 3D Glass Specular Sheen Arc
-      gH.lineStyle(2.0, 0xffffff, 0.45);
-      gH.moveTo(-wRim * 0.7, 8);
-      gH.quadraticCurveTo(-neckW * 0.7, neckY * 0.5, -neckW * 0.7, neckY);
 
-      // 4. Golden Ornate Neck Ring with Inlaid Gem
-      gH.lineStyle(2.2, 0xffd700, 0.95);
-      gH.drawEllipse(0, neckY, neckW * 1.1, 4.5);
-      gH.beginFill(0xff1744, 0.95);
-      gH.drawCircle(0, neckY, 3.5);
-      gH.endFill();
 
       // Gold mouth rim crowning the flared vessel
       this.drawBackRim(gBack, 0, 2, wRim, 6, 4, 0xffd700, 0.95);
