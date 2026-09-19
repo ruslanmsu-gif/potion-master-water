@@ -211,17 +211,22 @@ const PRESET_LEVELS = [
             []  // Пустая колба 2
         ]
     },
-    // Уровень 8: Волна релакса
+    // Уровень 8: Высокая сложность с открытыми слоями (Узел Архимага)
     {
-        title: 'Урок 8: Равновесие магии',
+        title: 'Урок 8: Узел Архимага',
         chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['amber', 'amber', 'ruby', 'emerald'],
-            ['sapphire', 'ruby', 'emerald', 'sapphire'],
-            ['emerald', 'sapphire', 'ruby', 'ruby'],
-            ['emerald', 'amber', 'sapphire', 'amber'],
-            [],
-            []
+            ['ruby', 'ruby', 'emerald', 'sapphire'],
+            ['amethyst', 'cyan', 'amber', 'sapphire'],
+            ['emerald', 'emerald', 'rose', 'amber'],
+            ['gold', 'violet', 'cyan', 'ruby'],
+            ['violet', 'violet', 'gold', 'emerald'],
+            ['rose', 'amber', 'sapphire', 'cyan'],
+            ['cyan', 'amethyst', 'amber', 'rose'],
+            ['sapphire', 'amethyst', 'ruby', 'violet'],
+            ['gold', 'gold', 'amethyst', 'rose'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
         ]
     },
     // Уровень 9: Ввод 5-го цвета (Amethyst)
