@@ -356,13 +356,16 @@ const PRESET_LEVELS = [
         ]
     },
     {
-        title: 'Урок 14: Лунные приливы',
+        title: 'Урок 14: Лунные Приливы',
         chapter: 'Семестр 2: Продвинутая алхимия',
         flasks: [
-            ['rose', 'sapphire', 'emerald', 'gold'],
-            ['gold', 'rose', 'sapphire', 'emerald'],
-            ['emerald', 'gold', 'rose', 'sapphire'],
-            ['sapphire', 'emerald', 'gold', 'rose'],
+            ['emerald', 'ruby', 'amber', 'cyan'],
+            ['amethyst', 'cyan', 'rose', 'emerald'],
+            ['amber', 'rose', 'amethyst', 'rose'],
+            ['ruby', 'sapphire', 'emerald', 'amber'],
+            ['emerald', 'cyan', 'sapphire', 'amethyst'],
+            ['rose', 'amber', 'sapphire', 'amethyst'],
+            ['sapphire', 'ruby', 'ruby', 'cyan'],
             [],
             []
         ]
