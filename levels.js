@@ -300,13 +300,16 @@ const PRESET_LEVELS = [
     },
     // Уровни 11-15: Расширенные колдовские составы
     {
-        title: 'Урок 11: Золотая пыльца',
+        title: 'Урок 11: Пыльца Пикси',
         chapter: 'Семестр 2: Продвинутая алхимия',
         flasks: [
-            ['gold', 'ruby', 'sapphire', 'gold'],
-            ['emerald', 'gold', 'ruby', 'emerald'],
-            ['sapphire', 'emerald', 'gold', 'sapphire'],
-            ['ruby', 'sapphire', 'emerald', 'ruby'],
+            ['cyan', 'ruby', 'amethyst', 'sapphire'],
+            ['emerald', 'ruby', 'sapphire', 'emerald'],
+            ['emerald', 'sapphire', 'cyan', 'rose'],
+            ['ruby', 'ruby', 'emerald', 'rose'],
+            ['amethyst', 'cyan', 'amber', 'rose'],
+            ['amethyst', 'amber', 'rose', 'cyan'],
+            ['amber', 'amber', 'sapphire', 'amethyst'],
             [],
             []
         ]

@@ -1,4 +1,4 @@
-const GAME_VERSION = "v110";
+const GAME_VERSION = "v111";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -410,11 +410,25 @@ class GameEngine {
     const startY = Math.max(65, Math.round((h - totalGridH) / 2) + 10);
 
     for (let i = 0; i < total; i++) {
-      const row = Math.floor(i / MAX_COLS);
-      const col = i % MAX_COLS;
+      let row, col, rowCount;
+      if (rows === 2) {
+        const row0Count = Math.ceil(total / 2);
+        const row1Count = total - row0Count;
+        if (i < row0Count) {
+          row = 0;
+          col = i;
+          rowCount = row0Count;
+        } else {
+          row = 1;
+          col = i - row0Count;
+          rowCount = row1Count;
+        }
+      } else {
+        row = Math.floor(i / MAX_COLS);
+        col = i % MAX_COLS;
+        rowCount = (row === rows - 1) ? (total - row * MAX_COLS) : MAX_COLS;
+      }
 
-      // Center each row (last row may have fewer flasks)
-      const rowCount = (row === rows - 1) ? (total - row * MAX_COLS) : MAX_COLS;
       const rowStartX = Math.round((w - (rowCount - 1) * spacingX) / 2);
 
       const targetX = rowStartX + col * spacingX;
