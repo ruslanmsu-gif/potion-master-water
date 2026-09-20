@@ -1,4 +1,4 @@
-const GAME_VERSION = "v108";
+const GAME_VERSION = "v109";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -55,7 +55,9 @@ const PALETTE = [
   { id: 5, name: "Cyan Teal",     hex: 0x00e5ff, inner: 0x0088cc, glow: 0x84ffff, sparkles: 0xffffff },
   { id: 6, name: "Orange Magma",  hex: 0xff6d00, inner: 0xbb2200, glow: 0xffab40, sparkles: 0xffeb3b },
   { id: 7, name: "Rose Pink",     hex: 0xff4081, inner: 0xa80045, glow: 0xff80ab, sparkles: 0xffd1dc },
-  { id: 8, name: "Obsidian Violet", hex: 0x7c4dff, inner: 0x536dfe, glow: 0xb388ff, sparkles: 0xe040fb }
+  { id: 8, name: "Obsidian Violet", hex: 0x7c4dff, inner: 0x536dfe, glow: 0xb388ff, sparkles: 0xe040fb },
+  { id: 9, name: "Lunar Pearl",     hex: 0xdcd0c0, inner: 0xa89880, glow: 0xf0e8dd, sparkles: 0xffffff },
+  { id: 10, name: "Verdant Lime",   hex: 0x76ff03, inner: 0x4caf00, glow: 0xccff90, sparkles: 0xeeff41 }
 ];
 
 const MYSTERY_COLOR = {
@@ -182,8 +184,9 @@ class GameEngine {
           </div>
         `).join("");
       } else if (stepsContainer && preset.isRecipeLevel) {
+        const target = preset.recipe ? (preset.recipe.targetCount || 6) : 6;
         stepsContainer.innerHTML = `
-          <div class="intro-step"><span class="step-num">1</span><span>Отсортируйте все <b>6 цветов</b> по боковым колбам.</span></div>
+          <div class="intro-step"><span class="step-num">1</span><span>Отсортируйте все <b>${target} цветов</b> по колбам.</span></div>
           <div class="intro-step"><span class="step-num">2</span><span>После сборки цветов <b>Главная Колба</b> разблокируется.</span></div>
           <div class="intro-step"><span class="step-num">3</span><span>Перелейте эссенции в Главную Колбу для синтеза зелья!</span></div>
         `;
@@ -227,7 +230,9 @@ class GameEngine {
       gold: 5,
       cyan: 6,
       rose: 7,
-      violet: 8
+      violet: 8,
+      pearl: 9,
+      lime: 10
     };
 
     if (typeof PRESET_LEVELS !== 'undefined' && level <= PRESET_LEVELS.length) {
@@ -353,10 +358,14 @@ class GameEngine {
           flask.setBasePosition(rightCoords[i - 5].x, curY);
         }
 
-        // Extra Booster Flasks (i >= 9): position in 3rd row below grid, centered & completely visible!
+        // Extra Booster / Bottom Flasks (i >= 9): position in 3rd row below grid, centered & completely visible!
         if (total > 9) {
           const extraCount = total - 9;
-          const extraSpacingX = sideW + 12;
+          const maxAvailableW = w - 30;
+          const desiredSpacingX = sideW + 12;
+          const extraSpacingX = extraCount > 1
+            ? Math.min(desiredSpacingX, Math.floor(maxAvailableW / (extraCount - 1)))
+            : desiredSpacingX;
           const extraStartX = Math.round((w - (extraCount - 1) * extraSpacingX) / 2);
           const row3Y = gridTopY + 2 * gapY;
           for (let i = 9; i < total; i++) {
@@ -515,9 +524,10 @@ class GameEngine {
         const masterCount = this.flasks[0] ? this.flasks[0].layers.length : 0;
         const fullSideCount = this.flasks.filter(f => !f.isMasterVessel && f.isCompletedFull()).length;
         const totalCompleted = masterCount + fullSideCount;
+        const target = this.currentRecipe ? (this.currentRecipe.targetCount || 6) : 6;
         const recipeBanner = document.getElementById("recipe-banner");
         if (recipeBanner) {
-          recipeBanner.innerHTML = `🔒 <b>РИТУАЛ ЗАБЛОКИРОВАН:</b> Отсортируйте 6 цветов! (${totalCompleted}/6)`;
+          recipeBanner.innerHTML = `🔒 <b>РИТУАЛ ЗАБЛОКИРОВАН:</b> Отсортируйте ${target} цветов! (${totalCompleted}/${target})`;
         }
       }
     }
@@ -1077,16 +1087,20 @@ class GameEngine {
     }
 
     if (this.currentRecipe) {
-      // Level 5 (Recipe Boss Level):
-      // Instantly collect & sort all 6 colors into 6 side flasks (Flasks 1 to 6)
+      // Recipe Boss Level (Level 5, Level 10, etc.):
+      // Instantly collect & sort all distinct colors into side flasks
       // Master Vessel (Flask 0) is kept empty for manual pour testing!
-      const colors = [0, 1, 2, 3, 4, 6]; // Ruby, Emerald, Sapphire, Amber, Amethyst, Cyan
+      const allColors = new Set();
+      for (let i = 1; i < this.flasks.length; i++) {
+        for (const c of this.flasks[i].layers) allColors.add(c);
+      }
+      const colorList = Array.from(allColors);
       this.flasks[0].layers = [];
 
       for (let i = 1; i < this.flasks.length; i++) {
         const flask = this.flasks[i];
-        if (i <= 6) {
-          const colorId = colors[i - 1] ?? 0;
+        if (i <= colorList.length) {
+          const colorId = colorList[i - 1];
           flask.layers = [colorId, colorId, colorId, colorId];
         } else {
           flask.layers = [];
@@ -1654,10 +1668,12 @@ class FlaskView {
   }
 
   async synthesizePotion() {
-    // 1. Swirl & blend reaction: 6 colors mix together into radiant Prismatic Master Elixir
+    // 1. Swirl & blend reaction: all colors mix together into radiant Prismatic Master Elixir
     const duration = 1200;
     const startTime = performance.now();
     const origLayers = [...this.layers];
+    const layerCount = this.maxCapacity;
+    const paletteSize = PALETTE.length;
 
     if (window.soundEngine && typeof window.soundEngine.playFlaskComplete === 'function') {
       window.soundEngine.playFlaskComplete();
@@ -1669,12 +1685,12 @@ class FlaskView {
         const t = Math.min(1, elapsed / duration);
 
         if (t < 0.8) {
-          const shift = Math.floor(t * 14) % 6;
-          this.layers = origLayers.map((_, idx) => (idx + shift) % 9);
+          const shift = Math.floor(t * 14) % layerCount;
+          this.layers = origLayers.map((_, idx) => (idx + shift) % paletteSize);
           this.drawLiquids(0, 0, null, Math.sin(t * Math.PI * 8) * 0.15);
         } else {
-          // Final transformed state: 6 layers of radiant Prismatic Amethyst Potion (ID 4)
-          this.layers = [4, 4, 4, 4, 4, 4];
+          // Final transformed state: all layers become radiant Prismatic Amethyst Potion (ID 4)
+          this.layers = Array(layerCount).fill(4);
           this.drawLiquids();
         }
 

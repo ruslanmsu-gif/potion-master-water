@@ -80,6 +80,24 @@ const POTION_PALETTE = {
         bottomColor: '#4527a0',
         glowColor: 'rgba(124, 77, 255, 0.45)',
         bubbleColor: 'rgba(210, 180, 255, 0.7)'
+    },
+    pearl: {
+        id: 'pearl',
+        name: 'Lunar Pearl',
+        ruName: 'Лунный Жемчуг',
+        topColor: '#dcd0c0',
+        bottomColor: '#a89880',
+        glowColor: 'rgba(220, 208, 192, 0.45)',
+        bubbleColor: 'rgba(245, 240, 235, 0.7)'
+    },
+    lime: {
+        id: 'lime',
+        name: 'Verdant Sap',
+        ruName: 'Зелёный Огонь',
+        topColor: '#76ff03',
+        bottomColor: '#4caf00',
+        glowColor: 'rgba(118, 255, 3, 0.45)',
+        bubbleColor: 'rgba(200, 255, 150, 0.7)'
     }
 };
 
@@ -252,14 +270,32 @@ const PRESET_LEVELS = [
     {
         title: 'Урок 10: Экзамен Мастера Зелий',
         chapter: 'Семестр 1: Основы зельеварения',
+        isRecipeLevel: true,
+        recipe: {
+            potionName: 'Философский Эликсир',
+            targetCount: 11
+        },
+        introTitle: 'ЭКЗАМЕН МАСТЕРА ЗЕЛИЙ',
+        introSteps: [
+            'Отсортируйте все 11 цветов по боковым и нижним колбам.',
+            'После полной сборки Главный Сосуд разблокируется.',
+            'Перелейте все эссенции в Главный Сосуд для синтеза зелья!'
+        ],
         flasks: [
-            ['amethyst', 'amber', 'emerald', 'ruby'],
-            ['ruby', 'sapphire', 'amethyst', 'amber'],
-            ['emerald', 'ruby', 'sapphire', 'amethyst'],
-            ['amber', 'emerald', 'ruby', 'sapphire'],
-            ['sapphire', 'amethyst', 'amber', 'emerald'],
-            [],
-            []
+            [], // Central Master Vessel (Flask 0)
+            ['violet', 'amber', 'amethyst', 'violet'],
+            ['amethyst', 'emerald', 'sapphire', 'ruby'],
+            ['sapphire', 'pearl', 'sapphire', 'lime'],
+            ['cyan', 'ruby', 'rose', 'lime'],
+            ['lime', 'gold', 'emerald', 'amber'],
+            ['ruby', 'amber', 'sapphire', 'gold'],
+            ['violet', 'rose', 'pearl', 'ruby'],
+            ['cyan', 'pearl', 'rose', 'cyan'],
+            ['gold', 'amethyst', 'pearl', 'emerald'],
+            ['amber', 'rose', 'emerald', 'violet'],
+            ['lime', 'cyan', 'amethyst', 'gold'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
         ]
     },
     // Уровни 11-15: Расширенные колдовские составы
