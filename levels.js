@@ -332,13 +332,25 @@ const PRESET_LEVELS = [
         ]
     },
     {
-        title: 'Урок 13: Симфония эссенций',
+        title: 'Урок 13: Тайны Девяти Сводов',
         chapter: 'Семестр 2: Продвинутая алхимия',
+        isMysteryLevel: true,
+        introTitle: 'ТАЙНЫ ДЕВЯТИ СВОДОВ',
+        introSteps: [
+            '27 скрытых слоёв под знаками вопроса ❓',
+            'Только 2 пустые колбы для распутывания 9 цветов.',
+            'Планируйте ходы наперёд или используйте «+1 деление»!'
+        ],
         flasks: [
-            ['cyan', 'gold', 'ruby', 'amethyst'],
-            ['amethyst', 'cyan', 'gold', 'ruby'],
-            ['ruby', 'amethyst', 'cyan', 'gold'],
-            ['gold', 'ruby', 'amethyst', 'cyan'],
+            ['gold', 'rose', 'pearl', 'cyan'],
+            ['sapphire', 'amber', 'ruby', 'amethyst'],
+            ['emerald', 'pearl', 'cyan', 'sapphire'],
+            ['ruby', 'gold', 'amethyst', 'emerald'],
+            ['pearl', 'cyan', 'amber', 'ruby'],
+            ['rose', 'sapphire', 'emerald', 'gold'],
+            ['amethyst', 'emerald', 'rose', 'ruby'],
+            ['cyan', 'amethyst', 'sapphire', 'amber'],
+            ['amber', 'pearl', 'gold', 'rose'],
             [],
             []
         ]
