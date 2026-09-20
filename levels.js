@@ -315,12 +315,18 @@ const PRESET_LEVELS = [
         ]
     },
     {
-        title: 'Урок 12: Кристальный раствор',
+        title: 'Урок 12: Лабиринт Девяти Стихий',
         chapter: 'Семестр 2: Продвинутая алхимия',
         flasks: [
-            ['cyan', 'amethyst', 'amber', 'cyan'],
-            ['amethyst', 'cyan', 'amber', 'amethyst'],
-            ['amber', 'cyan', 'amethyst', 'amber'],
+            ['amethyst', 'ruby', 'pearl', 'amethyst'],
+            ['pearl', 'gold', 'amethyst', 'rose'],
+            ['rose', 'pearl', 'pearl', 'amber'],
+            ['sapphire', 'sapphire', 'ruby', 'amber'],
+            ['amber', 'ruby', 'amethyst', 'cyan'],
+            ['sapphire', 'rose', 'emerald', 'ruby'],
+            ['gold', 'emerald', 'gold', 'sapphire'],
+            ['rose', 'emerald', 'cyan', 'gold'],
+            ['cyan', 'cyan', 'emerald', 'amber'],
             [],
             []
         ]
