@@ -342,15 +342,15 @@ const PRESET_LEVELS = [
             'Планируйте ходы наперёд или используйте «+1 деление»!'
         ],
         flasks: [
-            ['gold', 'rose', 'pearl', 'cyan'],
-            ['sapphire', 'amber', 'ruby', 'amethyst'],
-            ['emerald', 'pearl', 'cyan', 'sapphire'],
-            ['ruby', 'gold', 'amethyst', 'emerald'],
-            ['pearl', 'cyan', 'amber', 'ruby'],
-            ['rose', 'sapphire', 'emerald', 'gold'],
-            ['amethyst', 'emerald', 'rose', 'ruby'],
-            ['cyan', 'amethyst', 'sapphire', 'amber'],
-            ['amber', 'pearl', 'gold', 'rose'],
+            ['gold', 'cyan', 'rose', 'ruby'],
+            ['pearl', 'sapphire', 'rose', 'sapphire'],
+            ['emerald', 'cyan', 'pearl', 'emerald'],
+            ['amethyst', 'gold', 'emerald', 'amber'],
+            ['amber', 'rose', 'amethyst', 'ruby'],
+            ['gold', 'rose', 'amethyst', 'sapphire'],
+            ['cyan', 'sapphire', 'gold', 'ruby'],
+            ['ruby', 'pearl', 'amber', 'emerald'],
+            ['pearl', 'amethyst', 'cyan', 'amber'],
             [],
             []
         ]
