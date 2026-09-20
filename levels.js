@@ -303,13 +303,13 @@ const PRESET_LEVELS = [
         title: 'Урок 11: Пыльца Пикси',
         chapter: 'Семестр 2: Продвинутая алхимия',
         flasks: [
-            ['cyan', 'ruby', 'amethyst', 'sapphire'],
-            ['emerald', 'ruby', 'sapphire', 'emerald'],
-            ['emerald', 'sapphire', 'cyan', 'rose'],
-            ['ruby', 'ruby', 'emerald', 'rose'],
-            ['amethyst', 'cyan', 'amber', 'rose'],
-            ['amethyst', 'amber', 'rose', 'cyan'],
-            ['amber', 'amber', 'sapphire', 'amethyst'],
+            ['rose', 'amethyst', 'emerald', 'amber'],
+            ['cyan', 'sapphire', 'ruby', 'cyan'],
+            ['emerald', 'emerald', 'ruby', 'rose'],
+            ['amethyst', 'sapphire', 'rose', 'ruby'],
+            ['sapphire', 'sapphire', 'cyan', 'amber'],
+            ['rose', 'emerald', 'amber', 'amethyst'],
+            ['cyan', 'ruby', 'amethyst', 'amber'],
             [],
             []
         ]
