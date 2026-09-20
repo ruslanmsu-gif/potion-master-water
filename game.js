@@ -1,4 +1,4 @@
-const GAME_VERSION = "v109";
+const GAME_VERSION = "v110";
 
 const LEADERBOARD_DATA = {
   "all-time": [
@@ -302,13 +302,13 @@ class GameEngine {
       const sideW = flaskWidth;   // Exactly 42px - SAME as Levels 1-4!
       const sideH = flaskHeight;  // Exactly 143px - SAME as Levels 1-4!
 
-      const ROW_GAP = 22; // Equal vertical gap between ALL rows
-      const gapX = sideW + 14;
+      const ROW_GAP = 26; // Equal vertical gap between ALL rows
+      const gapX = sideW + GAP; // Exactly matching standard GAP (22px) between flasks
       const gapY = sideH + ROW_GAP;
 
       // Master Vessel height equals 2 rows of standard flasks + gap
-      const masterH = Math.round(2 * sideH + ROW_GAP); // ~308px high!
-      const masterW = Math.round(masterH / 3.4);   // ~90px wide!
+      const masterH = Math.round(2 * sideH + ROW_GAP); // ~312px high!
+      const masterW = Math.round(masterH / 3.4);   // ~92px wide!
 
       const totalGridH = numRows * sideH + (numRows - 1) * ROW_GAP;
       const gridTopY = hasBoosters
@@ -361,8 +361,8 @@ class GameEngine {
         // Extra Booster / Bottom Flasks (i >= 9): position in 3rd row below grid, centered & completely visible!
         if (total > 9) {
           const extraCount = total - 9;
-          const maxAvailableW = w - 30;
-          const desiredSpacingX = sideW + 12;
+          const maxAvailableW = w - 24;
+          const desiredSpacingX = sideW + GAP; // Exactly matching standard GAP (22px) between flasks
           const extraSpacingX = extraCount > 1
             ? Math.min(desiredSpacingX, Math.floor(maxAvailableW / (extraCount - 1)))
             : desiredSpacingX;
