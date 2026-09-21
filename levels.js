@@ -386,6 +386,30 @@ const PRESET_LEVELS = [
             [],
             []
         ]
+    },
+    {
+        title: 'Урок 16: Двойной Гордиев Узел',
+        chapter: 'Семестр 1: Основы зельеварения',
+        isMysteryLevel: true,
+        introTitle: 'ДВОЙНОЙ ГОРДИЕВ УЗЕЛ',
+        introSteps: [
+            '27 скрытых слоёв под знаками вопроса ❓',
+            'Два вложенных цикла блокировки.',
+            'Приготовьтесь использовать «+1 деление» дважды!'
+        ],
+        flasks: [
+            ['sapphire', 'amethyst', 'pearl', 'rose'],
+            ['cyan', 'gold', 'amber', 'ruby'],
+            ['ruby', 'emerald', 'pearl', 'sapphire'],
+            ['gold', 'amber', 'amethyst', 'cyan'],
+            ['amber', 'cyan', 'sapphire', 'amethyst'],
+            ['rose', 'cyan', 'gold', 'pearl'],
+            ['gold', 'emerald', 'pearl', 'emerald'],
+            ['sapphire', 'ruby', 'amethyst', 'rose'],
+            ['rose', 'emerald', 'ruby', 'amber'],
+            [],
+            []
+        ]
     }
 ];
 
