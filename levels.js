@@ -425,6 +425,23 @@ const PRESET_LEVELS = [
             [],
             []
         ]
+    },
+    {
+        title: 'Урок 18: Эссенция Феникса',
+        chapter: 'Семестр 1: Основы зельеварения',
+        flasks: [
+            ['amber', 'amethyst', 'emerald', 'emerald'],
+            ['amethyst', 'rose', 'gold', 'amber'],
+            ['pearl', 'sapphire', 'amethyst', 'amber'],
+            ['sapphire', 'ruby', 'gold', 'amethyst'],
+            ['sapphire', 'ruby', 'emerald', 'sapphire'],
+            ['rose', 'pearl', 'cyan', 'gold'],
+            ['amber', 'emerald', 'rose', 'cyan'],
+            ['cyan', 'pearl', 'pearl', 'rose'],
+            ['cyan', 'ruby', 'ruby', 'gold'],
+            [],
+            []
+        ]
     }
 ];
 
