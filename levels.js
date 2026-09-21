@@ -485,17 +485,17 @@ const PRESET_LEVELS = [
         ],
         flasks: [
             [], // Central Master Vessel (Flask 0)
-            ['emerald', 'cyan', 'ruby', 'emerald'],
-            ['amethyst', 'violet', 'rose', 'gold'],
-            ['amber', 'lime', 'violet', 'cyan'],
-            ['cyan', 'gold', 'rose', 'lime'],
-            ['sapphire', 'sapphire', 'rose', 'amber'],
-            ['lime', 'gold', 'lime', 'rose'],
-            ['pearl', 'emerald', 'ruby', 'violet'],
-            ['amber', 'amethyst', 'amber', 'sapphire'],
-            ['pearl', 'amethyst', 'cyan', 'ruby'],
-            ['violet', 'ruby', 'pearl', 'pearl'],
-            ['emerald', 'sapphire', 'gold', 'amethyst'],
+            ['ruby', 'lime', 'violet', 'cyan'],
+            ['cyan', 'sapphire', 'rose', 'sapphire'],
+            ['pearl', 'lime', 'rose', 'gold'],
+            ['gold', 'lime', 'rose', 'violet'],
+            ['amber', 'cyan', 'pearl', 'emerald'],
+            ['ruby', 'amethyst', 'ruby', 'amethyst'],
+            ['amber', 'amber', 'gold', 'violet'],
+            ['emerald', 'amber', 'cyan', 'sapphire'],
+            ['amethyst', 'sapphire', 'emerald', 'pearl'],
+            ['gold', 'ruby', 'lime', 'pearl'],
+            ['violet', 'rose', 'emerald', 'amethyst'],
             [], // Пустая колба 1
             []  // Пустая колба 2
         ]
