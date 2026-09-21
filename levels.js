@@ -410,6 +410,21 @@ const PRESET_LEVELS = [
             [],
             []
         ]
+    },
+    {
+        title: 'Урок 17: Кристальный Водоворот',
+        chapter: 'Семестр 1: Основы зельеварения',
+        flasks: [
+            ['amethyst', 'rose', 'emerald', 'ruby'],
+            ['amethyst', 'sapphire', 'ruby', 'emerald'],
+            ['ruby', 'emerald', 'cyan', 'sapphire'],
+            ['sapphire', 'amber', 'cyan', 'amethyst'],
+            ['cyan', 'amber', 'emerald', 'cyan'],
+            ['sapphire', 'rose', 'ruby', 'amethyst'],
+            ['amber', 'rose', 'rose', 'amber'],
+            [],
+            []
+        ]
     }
 ];
 
