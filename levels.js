@@ -466,6 +466,39 @@ const PRESET_LEVELS = [
             [],
             []
         ]
+    },
+    // Уровень 20: Финал 1 семестра (Великий Экзамен Архимага)
+    {
+        title: 'Урок 20: Великий Экзамен Архимага',
+        chapter: 'Семестр 1: Основы зельеварения',
+        isRecipeLevel: true,
+        recipe: {
+            potionName: 'Эликсир Вечной Жизни',
+            targetCount: 11
+        },
+        isMysteryLevel: true,
+        introTitle: 'ВЕЛИКИЙ ЭКЗАМЕН АРХИМАГА',
+        introSteps: [
+            'Финальный экзамен 1-го семестра!',
+            '33 скрытых слоя под знаками ❓ в 11 колбах.',
+            'Соберите 11 чистых эссенций и перелейте их в Главный Сосуд!'
+        ],
+        flasks: [
+            [], // Central Master Vessel (Flask 0)
+            ['emerald', 'cyan', 'ruby', 'emerald'],
+            ['amethyst', 'violet', 'rose', 'gold'],
+            ['amber', 'lime', 'violet', 'cyan'],
+            ['cyan', 'gold', 'rose', 'lime'],
+            ['sapphire', 'sapphire', 'rose', 'amber'],
+            ['lime', 'gold', 'lime', 'rose'],
+            ['pearl', 'emerald', 'ruby', 'violet'],
+            ['amber', 'amethyst', 'amber', 'sapphire'],
+            ['pearl', 'amethyst', 'cyan', 'ruby'],
+            ['violet', 'ruby', 'pearl', 'pearl'],
+            ['emerald', 'sapphire', 'gold', 'amethyst'],
+            [], // Пустая колба 1
+            []  // Пустая колба 2
+        ]
     }
 ];
 
