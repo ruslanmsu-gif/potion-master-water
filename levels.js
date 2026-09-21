@@ -442,6 +442,30 @@ const PRESET_LEVELS = [
             [],
             []
         ]
+    },
+    {
+        title: 'Урок 19: Око Василиска',
+        chapter: 'Семестр 1: Основы зельеварения',
+        isMysteryLevel: true,
+        introTitle: 'ОКО ВАСИЛИСКА',
+        introSteps: [
+            '27 скрытых слоёв под знаками вопроса ❓',
+            'Три цвета полностью скрыты в глубине.',
+            'Приготовьтесь использовать дополнительные деления!'
+        ],
+        flasks: [
+            ['ruby', 'rose', 'amethyst', 'gold'],
+            ['sapphire', 'cyan', 'gold', 'sapphire'],
+            ['amethyst', 'amber', 'pearl', 'ruby'],
+            ['emerald', 'pearl', 'amethyst', 'gold'],
+            ['rose', 'ruby', 'cyan', 'emerald'],
+            ['sapphire', 'rose', 'cyan', 'emerald'],
+            ['pearl', 'emerald', 'amber', 'gold'],
+            ['sapphire', 'cyan', 'amethyst', 'amber'],
+            ['ruby', 'amber', 'rose', 'pearl'],
+            [],
+            []
+        ]
     }
 ];
 
