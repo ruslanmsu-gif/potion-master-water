@@ -301,7 +301,7 @@ const PRESET_LEVELS = [
     // Уровни 11-15: Расширенные колдовские составы
     {
         title: 'Урок 11: Пыльца Пикси',
-        chapter: 'Семестр 2: Продвинутая алхимия',
+        chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
             ['rose', 'amethyst', 'emerald', 'amber'],
             ['cyan', 'sapphire', 'ruby', 'cyan'],
@@ -316,7 +316,7 @@ const PRESET_LEVELS = [
     },
     {
         title: 'Урок 12: Лабиринт Девяти Стихий',
-        chapter: 'Семестр 2: Продвинутая алхимия',
+        chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
             ['amethyst', 'ruby', 'pearl', 'amethyst'],
             ['pearl', 'gold', 'amethyst', 'rose'],
@@ -333,7 +333,7 @@ const PRESET_LEVELS = [
     },
     {
         title: 'Урок 13: Тайны Девяти Сводов',
-        chapter: 'Семестр 2: Продвинутая алхимия',
+        chapter: 'Семестр 1: Основы зельеварения',
         isMysteryLevel: true,
         introTitle: 'ТАЙНЫ ДЕВЯТИ СВОДОВ',
         introSteps: [
@@ -357,7 +357,7 @@ const PRESET_LEVELS = [
     },
     {
         title: 'Урок 14: Лунные Приливы',
-        chapter: 'Семестр 2: Продвинутая алхимия',
+        chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
             ['emerald', 'ruby', 'amber', 'cyan'],
             ['amethyst', 'cyan', 'rose', 'emerald'],
@@ -372,14 +372,17 @@ const PRESET_LEVELS = [
     },
     {
         title: 'Урок 15: Великое Делание (Magnum Opus)',
-        chapter: 'Семестр 2: Продвинутая алхимия',
+        chapter: 'Семестр 1: Основы зельеварения',
         flasks: [
-            ['rose', 'cyan', 'amethyst', 'amber'],
-            ['ruby', 'sapphire', 'emerald', 'gold'],
-            ['cyan', 'amethyst', 'amber', 'rose'],
-            ['sapphire', 'emerald', 'gold', 'ruby'],
-            ['amethyst', 'amber', 'rose', 'cyan'],
-            ['emerald', 'gold', 'ruby', 'sapphire'],
+            ['pearl', 'sapphire', 'rose', 'pearl'],
+            ['ruby', 'gold', 'rose', 'amber'],
+            ['emerald', 'amber', 'pearl', 'gold'],
+            ['gold', 'ruby', 'emerald', 'sapphire'],
+            ['rose', 'gold', 'ruby', 'rose'],
+            ['amethyst', 'pearl', 'amethyst', 'amethyst'],
+            ['amethyst', 'amber', 'cyan', 'sapphire'],
+            ['cyan', 'amber', 'sapphire', 'emerald'],
+            ['ruby', 'cyan', 'cyan', 'emerald'],
             [],
             []
         ]
